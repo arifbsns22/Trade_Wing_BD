@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "817332149423",
+    "project_id": "trade-wign-bd",
+    "storage_bucket": "trade-wign-bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817332149423:android:34ce03f877f8faf962c85a",
+        "android_client_info": {
+          "package_name": "com.ayattech.trade_wign_bd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0u3o1M0L-dazisvK66pR-Gfk15-Az1vw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

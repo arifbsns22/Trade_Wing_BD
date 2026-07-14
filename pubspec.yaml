@@ -1,0 +1,73 @@
+name: trade_wign_bd
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  firebase_core: 4.11.0
+  flutter_svg: ^2.3.0
+  get: ^4.7.3
+  lottie: ^3.5.1
+  smooth_page_indicator: ^2.0.1
+  carousel_slider: ^5.1.2
+  local_auth: ^3.0.1
+  cloud_firestore: ^6.6.0
+  shared_preferences: ^2.5.5
+  fl_chart: ^1.2.0
+  image_picker: ^1.1.2
+  font_awesome_flutter: ^11.0.0
+  skeletonizer: ^2.1.3
+  timelines_plus: ^2.0.0
+  url_launcher: ^6.3.2
+  flutter_secure_storage: ^10.3.1
+
+  minio: ^3.5.8
+  firebase_messaging: ^16.4.1
+  flutter_local_notifications: ^22.0.1
+  icons_launcher: ^3.1.0
+  firebase_analytics: ^12.4.3
+  graphview: ^1.5.1
+  intl: ^0.20.3
+  shorebird_code_push: ^2.0.7
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/logos/
+    - assets/backgrounds/
+    - assets/svg_icons/
+    - assets/color_icons/
+    - assets/color_icons/finance/
+    - assets/images/
+    - assets/animations/
+    - shorebird.yaml
+
+  fonts:
+    - family: Sirajee Sanjer
+      fonts:
+        - asset: assets/fonts/SirajeeSanjarUnicode.ttf
+
+icons_launcher:
+  image_path: "assets/logos/app_icon.png"
+  platforms:
+    android:
+      enable: true
+    ios:
+      enable: true

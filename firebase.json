@@ -1,0 +1,29 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "trade-wign-bd",
+          "appId": "1:817332149423:android:34ce03f877f8faf962c85a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "trade-wign-bd",
+          "configurations": {
+            "android": "1:817332149423:android:34ce03f877f8faf962c85a",
+            "ios": "1:817332149423:ios:9224d1905dd1bbee62c85a",
+            "web": "1:817332149423:web:ceee03f6beab6cc262c85a"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "us-central1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
