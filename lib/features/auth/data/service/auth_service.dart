@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 
 import 'dart:math';
 
@@ -55,6 +56,14 @@ class AuthService {
           'referredBy': businessCode,
         'createdAt': FieldValue.serverTimestamp(),
       });
+
+      // Send real-time admin notification
+      await NotificationHelper.sendNotification(
+        title: 'নতুন ইউজার রেজিস্ট্রেশন! 👤',
+        body: 'নতুন ইউজার $name ($mobile) রেজিস্ট্রেশন সম্পন্ন করেছেন।',
+        type: 'user_registered',
+        isAdmin: true,
+      );
 
       return 'success';
     } catch (e) {

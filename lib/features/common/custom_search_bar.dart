@@ -684,12 +684,15 @@ class _CustomSearchBarState extends State<CustomSearchBar>
                                 cartCtrl.setQuantity(id, qty);
                                 Get.back(); // close dialog
                                 Get.snackbar(
-                                  'Added to Cart',
-                                  '${product.name} has been added to your cart.',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: AppColors.green,
-                                  colorText: Colors.white,
-                                );
+  'Added to Cart',
+  '${product.name} has been added to your cart.',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                               },
                               child: const Text(
                                 'Add to Cart',

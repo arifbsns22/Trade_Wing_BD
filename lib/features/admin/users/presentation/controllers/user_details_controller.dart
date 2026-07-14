@@ -51,10 +51,15 @@ class UserDetailsController extends GetxController {
     } catch (e) {
       debugPrint('Error fetching user orders: $e');
       Get.snackbar(
-        'ত্রুটি',
-        'ইউজারের অর্ডার সমূহ আনতে সমস্যা হচ্ছে',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'ইউজারের অর্ডার সমূহ আনতে সমস্যা হচ্ছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       isLoading.value = false;
     }

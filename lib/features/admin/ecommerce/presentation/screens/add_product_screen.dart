@@ -182,46 +182,71 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     if (_selectedCategories.isEmpty) {
       Get.snackbar(
-        'ত্রুটি',
-        'দয়া করে কমপক্ষে একটি ক্যাটাগরি নির্বাচন করুন',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'দয়া করে কমপক্ষে একটি ক্যাটাগরি নির্বাচন করুন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
     if (_selectedImages.isEmpty) {
       Get.snackbar(
-        'ত্রুটি',
-        'দয়া করে পণ্যের ছবি যোগ করুন',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'দয়া করে পণ্যের ছবি যোগ করুন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
     if (_selectedProductType == null) {
       Get.snackbar(
-        'ত্রুটি',
-        'দয়া করে পণ্যের টাইপ নির্বাচন করুন',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'দয়া করে পণ্যের টাইপ নির্বাচন করুন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
     if (_unit.isEmpty) {
       Get.snackbar(
-        'ত্রুটি',
-        'দয়া করে পণ্যের একক (Unit) দিন',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'দয়া করে পণ্যের একক (Unit) দিন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
     if (_regularPrice <= 0) {
       Get.snackbar(
-        'ত্রুটি',
-        'দয়া করে পণ্যের সঠিক মূল্য দিন',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'দয়া করে পণ্যের সঠিক মূল্য দিন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
@@ -323,10 +348,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
     } catch (e) {
       Navigator.pop(context); // Close dialog if crash
       Get.snackbar(
-        'ব্যর্থতা',
-        'পণ্য আপলোড করতে সমস্যা হয়েছে: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ব্যর্থতা',
+  'পণ্য আপলোড করতে সমস্যা হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 

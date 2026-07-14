@@ -235,19 +235,15 @@ class _CartScreenState extends State<CartScreen> {
                         if (authCtrl.currentUserRole.value ==
                             'Guest Customer') {
                           Get.snackbar(
-                            'লগইন প্রয়োজন',
-                            'অর্ডার সম্পন্ন করতে প্রথমে আপনার অ্যাকাউন্টে লগইন করুন।',
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.9,
-                            ),
-                            colorText: Colors.black87,
-                            borderColor: AppColors.primaryColor.withValues(
-                              alpha: 0.2,
-                            ),
-                            borderWidth: 1,
-                            snackPosition: SnackPosition.BOTTOM,
-                            margin: const EdgeInsets.all(16),
-                          );
+  'লগইন প্রয়োজন',
+  'অর্ডার সম্পন্ন করতে প্রথমে আপনার অ্যাকাউন্টে লগইন করুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                           Get.to(
                             () => const LoginScreen(returnBack: true),
                             transition: Transition.rightToLeft,

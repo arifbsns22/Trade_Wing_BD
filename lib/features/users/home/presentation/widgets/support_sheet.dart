@@ -65,15 +65,16 @@ class SupportSheet extends StatelessWidget {
                 subtitle: '+8801805003667',
                 color: Colors.green,
                 onTap: () async {
-                  final Uri url = Uri.parse('https://wa.me/8801805003667');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  } else {
-                    Get.snackbar(
-                      'Error',
-                      'Could not launch WhatsApp',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+                  final Uri whatsappAppUri = Uri.parse('whatsapp://send?phone=8801805003667');
+                  final Uri whatsappWebUri = Uri.parse('https://wa.me/8801805003667');
+                  try {
+                    if (await canLaunchUrl(whatsappAppUri)) {
+                      await launchUrl(whatsappAppUri, mode: LaunchMode.externalApplication);
+                    } else {
+                      await launchUrl(whatsappWebUri, mode: LaunchMode.externalApplication);
+                    }
+                  } catch (e) {
+                    await launchUrl(whatsappWebUri, mode: LaunchMode.externalApplication);
                   }
                 },
               ),
@@ -88,15 +89,16 @@ class SupportSheet extends StatelessWidget {
                 subtitle: 'আমাদের ফেইসবুক পেইজ',
                 color: Colors.blue,
                 onTap: () async {
-                  final Uri url = Uri.parse('https://www.facebook.com/tradewingBD');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  } else {
-                    Get.snackbar(
-                      'Error',
-                      'Could not open Facebook',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+                  final Uri fbAppUri = Uri.parse('fb://facewebmodal/f?href=https://www.facebook.com/tradewingBD');
+                  final Uri fbWebUri = Uri.parse('https://www.facebook.com/tradewingBD');
+                  try {
+                    if (await canLaunchUrl(fbAppUri)) {
+                      await launchUrl(fbAppUri, mode: LaunchMode.externalApplication);
+                    } else {
+                      await launchUrl(fbWebUri, mode: LaunchMode.externalApplication);
+                    }
+                  } catch (e) {
+                    await launchUrl(fbWebUri, mode: LaunchMode.externalApplication);
                   }
                 },
               ),
@@ -116,10 +118,15 @@ class SupportSheet extends StatelessWidget {
                     await launchUrl(url);
                   } else {
                     Get.snackbar(
-                      'Error',
-                      'Could not launch phone dialer',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+  'Error',
+  'Could not launch phone dialer',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                   }
                 },
               ),

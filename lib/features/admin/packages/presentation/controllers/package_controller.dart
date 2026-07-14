@@ -40,22 +40,28 @@ class PackageController extends GetxController {
       isLoading.value = true;
       await _firestore.collection('packages').add(package.toFirestore());
       Get.snackbar(
-        'সফল',
-        'প্যাকেজটি সফলভাবে যুক্ত করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF08B3AC),
-        colorText: Colors.white,
-      );
+  'সফল',
+  'প্যাকেজটি সফলভাবে যুক্ত করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error adding package: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'প্যাকেজ যুক্ত করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ব্যর্থতা',
+  'প্যাকেজ যুক্ত করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -70,22 +76,28 @@ class PackageController extends GetxController {
           .doc(id)
           .update(package.toFirestore());
       Get.snackbar(
-        'সফল',
-        'প্যাকেজটি আপডেট করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF08B3AC),
-        colorText: Colors.white,
-      );
+  'সফল',
+  'প্যাকেজটি আপডেট করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error updating package: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'প্যাকেজ আপডেট করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ব্যর্থতা',
+  'প্যাকেজ আপডেট করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -95,10 +107,28 @@ class PackageController extends GetxController {
   Future<void> deletePackage(String id) async {
     try {
       await _firestore.collection('packages').doc(id).delete();
-      Get.snackbar('সফল', 'প্যাকেজটি মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'প্যাকেজটি মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting package: $e');
-      Get.snackbar('ত্রুটি', 'প্যাকেজ মোছা যায়নি: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'প্যাকেজ মোছা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 }

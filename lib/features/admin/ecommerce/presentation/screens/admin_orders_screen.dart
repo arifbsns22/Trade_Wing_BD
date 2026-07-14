@@ -345,20 +345,26 @@ class AdminOrdersScreen extends StatelessWidget {
                                             color: AppColors.green,
                                             onTap: () {
                                               Get.snackbar(
-                                                'Print',
-                                                'Coming soon.',
-                                                backgroundColor: Colors.white
-                                                    .withValues(alpha: 0.9),
-                                                colorText: Colors.black87,
-                                                borderColor: AppColors
-                                                    .primaryColor
-                                                    .withValues(alpha: 0.2),
-                                                borderWidth: 1,
-                                                snackPosition:
-                                                    SnackPosition.BOTTOM,
-                                                margin: const EdgeInsets.all(
-                                                  16,
-                                                ),
+  'Print',
+  'Coming soon.',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
+                                            },
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _buildActionButton(
+                                            icon: Icons.delete_outline_rounded,
+                                            color: Colors.redAccent,
+                                            onTap: () {
+                                              _showDeleteConfirmationDialog(
+                                                context,
+                                                controller,
+                                                order,
                                               );
                                             },
                                           ),
@@ -380,6 +386,72 @@ class AdminOrdersScreen extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+    BuildContext context,
+    AdminOrdersController controller,
+    OrderModel order,
+  ) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+            SizedBox(width: 8),
+            Text(
+              'অর্ডার ডিলিট নিশ্চিতকরণ',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'আপনি কি নিশ্চিতভাবে এই অর্ডারটি ডিলিট করতে চান?',
+              style: TextStyle(color: Colors.black87),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+              ),
+              child: const Text(
+                '⚠️ সতর্কতা: অর্ডার ডিলিট করলে স্টোরে পণ্য স্টক বৃদ্ধি পাবে এবং ইউজারের কেনাকাটার হিসাব/পয়েন্ট স্বয়ংক্রিয়ভাবে হ্রাস পাবে। এই কাজটি পরিবর্তন করা যাবে না।',
+                style: TextStyle(color: Colors.redAccent, fontSize: 12, height: 1.4),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text(
+              'বাতিল',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Get.back();
+              controller.deleteOrder(order);
+            },
+            child: const Text('ডিলিট করুন', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 

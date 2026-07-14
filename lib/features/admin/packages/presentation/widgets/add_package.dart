@@ -91,7 +91,16 @@ class _AddPackageSheetState extends State<_AddPackageSheet> {
 
   void _addProduct() {
     if (_prodNameCtrl.text.trim().isEmpty || _prodPkgPriceCtrl.text.trim().isEmpty) {
-      Get.snackbar('ত্রুটি', 'পণ্যের নাম এবং প্যাকেজ মূল্য দিন');
+      Get.snackbar(
+  'ত্রুটি',
+  'পণ্যের নাম এবং প্যাকেজ মূল্য দিন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
     
@@ -140,12 +149,30 @@ class _AddPackageSheetState extends State<_AddPackageSheet> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       if (_products.isEmpty) {
-        Get.snackbar('ত্রুটি', 'কমপক্ষে একটি প্রোডাক্ট যোগ করুন');
+        Get.snackbar(
+  'ত্রুটি',
+  'কমপক্ষে একটি প্রোডাক্ট যোগ করুন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
       
       if (_uploadedImageUrl == null && _selectedImageFile == null) {
-        Get.snackbar('ত্রুটি', 'প্যাকেজের জন্য একটি ছবি দিন');
+        Get.snackbar(
+  'ত্রুটি',
+  'প্যাকেজের জন্য একটি ছবি দিন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
 
@@ -167,7 +194,16 @@ class _AddPackageSheetState extends State<_AddPackageSheet> {
           finalImageUrl = url;
         } catch (e) {
           setState(() => _isUploadingImage = false);
-          Get.snackbar('Upload Error', e.toString());
+          Get.snackbar(
+  'Upload Error',
+  e.toString(),
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
           return;
         }
       }

@@ -27,13 +27,15 @@ void showPackagePaymentSheet(
       
       if (address == null || address.trim().isEmpty) {
         Get.snackbar(
-          'সতর্কতা',
-          'প্যাকেজ কেনার আগে অনুগ্রহ করে "আমার প্রোফাইল" -> "আমার ঠিকানা" থেকে আপনার ঠিকানা আপডেট করুন।',
-          backgroundColor: Colors.orangeAccent,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 4),
-          snackPosition: SnackPosition.TOP,
-        );
+  'সতর্কতা',
+  'প্যাকেজ কেনার আগে অনুগ্রহ করে "আমার প্রোফাইল" -> "আমার ঠিকানা" থেকে আপনার ঠিকানা আপডেট করুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
     } catch (e) {
@@ -95,12 +97,15 @@ class _PackagePaymentSheetState extends State<_PackagePaymentSheet> {
     if (_formKey.currentState!.validate()) {
       if (_isCustomer && (_nidFrontImage == null || _nidBackImage == null)) {
         Get.snackbar(
-          'ত্রুটি',
-          'এনআইডি এর সামনের এবং পেছনের ছবি আপলোড করুন',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+  'ত্রুটি',
+  'এনআইডি এর সামনের এবং পেছনের ছবি আপলোড করুন',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
 
@@ -225,13 +230,15 @@ class _PackagePaymentSheetState extends State<_PackagePaymentSheet> {
         );
       } else {
         Get.snackbar(
-          'সফল',
-          'পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে। এডমিন যাচাই করার পর আপনার প্যাকেজটি সক্রিয় হবে।',
-          backgroundColor: AppColors.primaryColor,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-        );
+  'সফল',
+  'পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে। এডমিন যাচাই করার পর আপনার প্যাকেজটি সক্রিয় হবে।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       }
     }
   }

@@ -249,9 +249,15 @@ class ListBannersWidget extends StatelessWidget {
                                     ),
                                     onPressed: () {
                                       Get.snackbar(
-                                        'তথ্য',
-                                        'এডিট ফিচার শীঘ্রই আসছে',
-                                      );
+  'তথ্য',
+  'এডিট ফিচার শীঘ্রই আসছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                                     },
                                   ),
                                 ),

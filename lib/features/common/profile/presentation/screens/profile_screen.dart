@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
+import 'package:trade_wign_bd/features/users/home/presentation/widgets/support_sheet.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
@@ -388,7 +389,16 @@ class UserProfileScreen extends StatelessWidget {
                       leadingIcon: Icons.account_balance_wallet_outlined,
                       title: 'ডিজিটাল মানিব্যাগ',
                       onTap: () {
-                        Get.snackbar('তথ্য', 'ডিজিটাল মানিব্যাগ শীঘ্রই আসছে');
+                        Get.snackbar(
+  'তথ্য',
+  'ডিজিটাল মানিব্যাগ শীঘ্রই আসছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                       },
                     ),
 
@@ -405,7 +415,10 @@ class UserProfileScreen extends StatelessWidget {
                       leadingIcon: Icons.support_agent_rounded,
                       title: 'সাপোর্ট',
                       onTap: () {
-                        Get.snackbar('তথ্য', 'সাপোর্ট সেন্টার শীঘ্রই চালু হবে');
+                        Get.bottomSheet(
+                          const SupportSheet(),
+                          isScrollControlled: true,
+                        );
                       },
                     ),
 

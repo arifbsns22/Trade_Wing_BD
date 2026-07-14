@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/all_products_screen.dart';
 import 'package:trade_wign_bd/features/users/home/presentation/widgets/support_sheet.dart';
 import 'package:trade_wign_bd/features/common/coming_soon_popuo.dart';
+import 'package:trade_wign_bd/features/users/club/presentation/screens/business_club_screen.dart';
 
 class FeatureItem {
   final String title;
@@ -35,6 +36,9 @@ final List<FeatureItem> featureList = [
   FeatureItem(
     title: AppTexts.businessClub,
     imagePath: FeaturesPath.businessClub,
+    onTap: () {
+      Get.to(() => const BusinessClubScreen());
+    },
   ),
   FeatureItem(title: AppTexts.others, imagePath: FeaturesPath.others),
   FeatureItem(

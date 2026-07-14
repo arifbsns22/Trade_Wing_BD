@@ -46,7 +46,16 @@ class EcommerceController extends GetxController {
       isLoading.value = true;
       final existing = await _firestore.collection('product_types').where('name', isEqualTo: name.trim()).get();
       if (existing.docs.isNotEmpty) {
-        Get.snackbar('ত্রুটি', 'এই প্রোডাক্ট টাইপ ইতিমধ্যে বিদ্যমান রয়েছে');
+        Get.snackbar(
+  'ত্রুটি',
+  'এই প্রোডাক্ট টাইপ ইতিমধ্যে বিদ্যমান রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return false;
       }
       await _firestore.collection('product_types').add({
@@ -86,10 +95,28 @@ class EcommerceController extends GetxController {
   Future<void> deleteProductType(String id) async {
     try {
       await _firestore.collection('product_types').doc(id).delete();
-      Get.snackbar('সফল', 'প্রোডাক্ট টাইপ মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'প্রোডাক্ট টাইপ মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting product type: $e');
-      Get.snackbar('ত্রুটি', 'প্রোডাক্ট টাইপ মুছতে ব্যর্থ হয়েছে: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'প্রোডাক্ট টাইপ মুছতে ব্যর্থ হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -113,7 +140,16 @@ class EcommerceController extends GetxController {
       isLoading.value = true;
       final existing = await _firestore.collection('units').where('name', isEqualTo: name.trim()).get();
       if (existing.docs.isNotEmpty) {
-        Get.snackbar('ত্রুটি', 'এই ইউনিট ইতিমধ্যে বিদ্যমান রয়েছে');
+        Get.snackbar(
+  'ত্রুটি',
+  'এই ইউনিট ইতিমধ্যে বিদ্যমান রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return false;
       }
       await _firestore.collection('units').add({
@@ -151,10 +187,28 @@ class EcommerceController extends GetxController {
   Future<void> deleteUnit(String id) async {
     try {
       await _firestore.collection('units').doc(id).delete();
-      Get.snackbar('সফল', 'ইউনিট মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'ইউনিট মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting unit: $e');
-      Get.snackbar('ত্রুটি', 'ইউনিট মুছতে ব্যর্থ হয়েছে: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'ইউনিট মুছতে ব্যর্থ হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -181,7 +235,16 @@ class EcommerceController extends GetxController {
       
       final existing = await _firestore.collection('categories').where('name', isEqualTo: name.trim()).get();
       if (existing.docs.isNotEmpty) {
-        Get.snackbar('ত্রুটি', 'এই ক্যাটাগরি ইতিমধ্যে বিদ্যমান রয়েছে');
+        Get.snackbar(
+  'ত্রুটি',
+  'এই ক্যাটাগরি ইতিমধ্যে বিদ্যমান রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return false;
       }
 
@@ -224,10 +287,28 @@ class EcommerceController extends GetxController {
   Future<void> deleteCategory(String id) async {
     try {
       await _firestore.collection('categories').doc(id).delete();
-      Get.snackbar('সফল', 'ক্যাটাগরি মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'ক্যাটাগরি মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting category: $e');
-      Get.snackbar('ত্রুটি', 'ক্যাটাগরি মুছতে ব্যর্থ হয়েছে: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'ক্যাটাগরি মুছতে ব্যর্থ হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -254,7 +335,16 @@ class EcommerceController extends GetxController {
       
       final existing = await _firestore.collection('brands').where('name', isEqualTo: name.trim()).get();
       if (existing.docs.isNotEmpty) {
-        Get.snackbar('ত্রুটি', 'এই ব্র্যান্ড ইতিমধ্যে বিদ্যমান রয়েছে');
+        Get.snackbar(
+  'ত্রুটি',
+  'এই ব্র্যান্ড ইতিমধ্যে বিদ্যমান রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return false;
       }
 
@@ -297,10 +387,28 @@ class EcommerceController extends GetxController {
   Future<void> deleteBrand(String id) async {
     try {
       await _firestore.collection('brands').doc(id).delete();
-      Get.snackbar('সফল', 'ব্র্যান্ড মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'ব্র্যান্ড মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting brand: $e');
-      Get.snackbar('ত্রুটি', 'ব্র্যান্ড মুছতে ব্যর্থ হয়েছে: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'ব্র্যান্ড মুছতে ব্যর্থ হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -325,22 +433,28 @@ class EcommerceController extends GetxController {
       isLoading.value = true;
       await _firestore.collection('products').add(product.toFirestore());
       Get.snackbar(
-        'সফল',
-        'পণ্যটি সফলভাবে যুক্ত করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF08B3AC),
-        colorText: Colors.white,
-      );
+  'সফল',
+  'পণ্যটি সফলভাবে যুক্ত করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error adding product: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'পণ্য যুক্ত করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ব্যর্থতা',
+  'পণ্য যুক্ত করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -353,22 +467,28 @@ class EcommerceController extends GetxController {
       isLoading.value = true;
       await _firestore.collection('products').doc(productId).update(product.toFirestore());
       Get.snackbar(
-        'সফল',
-        'পণ্যটির তথ্য সফলভাবে আপডেট করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+  'সফল',
+  'পণ্যটির তথ্য সফলভাবে আপডেট করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error updating product: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'পণ্য আপডেট করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ব্যর্থতা',
+  'পণ্য আপডেট করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -379,10 +499,28 @@ class EcommerceController extends GetxController {
   Future<void> deleteProduct(String productId) async {
     try {
       await _firestore.collection('products').doc(productId).delete();
-      Get.snackbar('সফল', 'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting product: $e');
-      Get.snackbar('ত্রুটি', 'পণ্যটি মোছা যায়নি: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'পণ্যটি মোছা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 

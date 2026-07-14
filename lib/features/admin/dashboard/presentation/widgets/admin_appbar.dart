@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/features/admin/settings/presentation/controllers/admin_settings_controller.dart';
 import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.dart';
@@ -51,33 +53,61 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
       // Right Side: Bell (Notifications) and Log Out Buttons
       actions: [
         // Bell Icon (Notifications with red dot/badge)
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.notifications_none_rounded,
-                color: AppColors.primaryColor,
-                size: 26,
-              ),
-              onPressed: () {
-                _showNotificationsDialog(context);
-              },
-              tooltip: 'নোটিফিকেশনস',
-            ),
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('notifications')
+              .where('isAdmin', isEqualTo: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            int unreadCount = 0;
+            if (snapshot.hasData) {
+              unreadCount = snapshot.data!.docs
+                  .where((doc) => doc.get('isRead') == false)
+                  .length;
+            }
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    unreadCount > 0
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_none_rounded,
+                    color: unreadCount > 0 ? const Color(0xFF08B3AC) : AppColors.primaryColor,
+                    size: 26,
+                  ),
+                  onPressed: () {
+                    _showNotificationsDialog(context);
+                  },
+                  tooltip: 'নোটিফিকেশনস',
                 ),
-                constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
-              ),
-            ),
-          ],
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      child: Center(
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
 
         // Logout Icon
@@ -107,44 +137,174 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // Show notifications stub dialog
+  // Show notifications dialog with real Firestore notifications
   void _showNotificationsDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.notifications_active, color: Color(0xFF08B3AC)),
-            SizedBox(width: 10),
-            Text(
-              'নোটিফিকেশনসমূহ',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildNotificationItem(
-              'নতুন ইউজার রেজিস্ট্রেশন সম্পন্ন হয়েছে।',
-              '১০ মিনিট আগে',
-            ),
-            const Divider(),
-            _buildNotificationItem(
-              '১টি নতুন ড্রাইভ প্যাকের রিকোয়েস্ট এসেছে।',
-              '২৫ মিনিট আগে',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            child: const Text('বন্ধ করুন'),
-            onPressed: () => Navigator.pop(context),
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          titlePadding: const EdgeInsets.fromLTRB(16, 16, 12, 8),
+          actionsPadding: const EdgeInsets.only(right: 16, bottom: 8),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.notifications_active, color: Color(0xFF08B3AC), size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'নোটিফিকেশনসমূহ',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.done_all, color: Colors.grey, size: 18),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'সব পঠিত হিসেবে চিহ্নিত করুন',
+                onPressed: () async {
+                  try {
+                    final snapshot = await FirebaseFirestore.instance
+                        .collection('notifications')
+                        .where('isAdmin', isEqualTo: true)
+                        .where('isRead', isEqualTo: false)
+                        .get();
+                    final batch = FirebaseFirestore.instance.batch();
+                    for (var doc in snapshot.docs) {
+                      batch.update(doc.reference, {'isRead': true});
+                    }
+                    await batch.commit();
+                  } catch (e) {
+                    debugPrint('Error marking notifications as read: $e');
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+          content: Container(
+            width: 300,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.45,
+            ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('notifications')
+                  .where('isAdmin', isEqualTo: true)
+                  .orderBy('createdAt', descending: true)
+                  .limit(15)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(
+                      child: Text(
+                        'কোন নোটিফিকেশন নেই',
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                final docs = snapshot.data!.docs;
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: docs.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1, thickness: 0.5),
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
+                    final String title = data['title'] ?? '';
+                    final String body = data['body'] ?? '';
+                    final bool isRead = data['isRead'] ?? false;
+                    final Timestamp? createdAt = data['createdAt'] as Timestamp?;
+                    
+                    String formattedTime = '';
+                    if (createdAt != null) {
+                      final date = createdAt.toDate();
+                      formattedTime = DateFormat('dd MMM, hh:mm a').format(date);
+                    }
+
+                    return InkWell(
+                      onTap: () {
+                        if (!isRead) {
+                          doc.reference.update({'isRead': true});
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (!isRead)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 5.0, right: 6.0),
+                                child: Icon(Icons.circle, size: 6, color: Colors.blue),
+                              ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    body,
+                                    style: const TextStyle(fontSize: 11, color: Colors.black54, height: 1.3),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    formattedTime,
+                                    style: TextStyle(fontSize: 9, color: Colors.grey.shade500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('বন্ধ করুন', style: TextStyle(fontSize: 13)),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
     );
   }
 

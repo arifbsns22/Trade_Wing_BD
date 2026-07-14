@@ -6,6 +6,7 @@ import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 
 void showOrderDetailsBottomSheet(BuildContext context, OrderModel order) {
   Get.bottomSheet(
@@ -45,12 +46,40 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
           .collection('orders')
           .doc(widget.order.orderId)
           .update({'orderStatus': newStatus.name});
+
+      // Send real-time notification to User
+      await NotificationHelper.sendNotification(
+        title: 'অর্ডার স্ট্যাটাস আপডেট! 📦',
+        body: 'আপনার অর্ডার #${widget.order.orderId} এর বর্তমান অবস্থা: ${newStatus.name}',
+        type: 'status_updated',
+        userMobile: widget.order.userMobile,
+        isAdmin: false,
+      );
+
       setState(() {
         currentOrderStatus = newStatus;
       });
-      Get.snackbar('Success', 'Order status updated to ${newStatus.name}');
+      Get.snackbar(
+  'Success',
+  'Order status updated to ${newStatus.name}',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update order status');
+      Get.snackbar(
+  'Error',
+  'Failed to update order status',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       setState(() => isUpdating = false);
     }
@@ -66,9 +95,27 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
       setState(() {
         currentPaymentStatus = newStatus;
       });
-      Get.snackbar('Success', 'Payment status updated to ${newStatus.name}');
+      Get.snackbar(
+  'Success',
+  'Payment status updated to ${newStatus.name}',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update payment status');
+      Get.snackbar(
+  'Error',
+  'Failed to update payment status',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       setState(() => isUpdating = false);
     }

@@ -36,10 +36,15 @@ class AdminUsersController extends GetxController {
     } catch (e) {
       debugPrint('Error fetching users: $e');
       Get.snackbar(
-        'ত্রুটি', 
-        'ইউজারদের তথ্য আনতে সমস্যা হচ্ছে', 
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'ত্রুটি',
+  'ইউজারদের তথ্য আনতে সমস্যা হচ্ছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       isLoading.value = false;
     }
@@ -134,12 +139,26 @@ class AdminUsersController extends GetxController {
         searchUsers(''); // Re-apply filter
       }
       Get.snackbar(
-        'সফল', 
-        newStatus ? 'ইউজারকে একটিভ করা হয়েছে' : 'ইউজারকে ব্লক করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+  'সফল',
+  newStatus ? 'ইউজারকে একটিভ করা হয়েছে' : 'ইউজারকে ব্লক করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
-      Get.snackbar('ত্রুটি', 'স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে');
+      Get.snackbar(
+  'ত্রুটি',
+  'স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -185,14 +204,32 @@ class AdminUsersController extends GetxController {
         updatedCount++;
       }
       
-      Get.snackbar('সফল', '$updatedCount ইউজারের অর্ডার ডেটা সিংক হয়েছে!', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+  'সফল',
+  '$updatedCount ইউজারের অর্ডার ডেটা সিংক হয়েছে!',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       
       // Re-fetch users to reflect changes
       await fetchUsers();
       
     } catch (e) {
       debugPrint('Error syncing user orders: $e');
-      Get.snackbar('ত্রুটি', 'ডেটা সিংক করতে সমস্যা হয়েছে', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+  'ত্রুটি',
+  'ডেটা সিংক করতে সমস্যা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       isLoading.value = false;
     }
   }

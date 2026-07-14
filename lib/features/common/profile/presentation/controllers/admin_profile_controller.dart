@@ -122,14 +122,15 @@ class AdminProfileController extends GetxController {
     if (referralCode.value.isNotEmpty && referralCode.value != 'N/A') {
       Clipboard.setData(ClipboardData(text: referralCode.value));
       Get.snackbar(
-        'সফল',
-        'বিজনেজ কোড ক্লিপবোর্ডে কপি করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF08B3AC).withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-        duration: const Duration(seconds: 2),
-      );
+  'সফল',
+  'বিজনেজ কোড ক্লিপবোর্ডে কপি করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 
@@ -161,25 +162,29 @@ class AdminProfileController extends GetxController {
       await prefs.setString('userName', newName);
 
       Get.snackbar(
-        'সফল',
-        'প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-      );
+  'সফল',
+  'প্রোফাইল তথ্য সফলভাবে আপডেট করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
 
       return true;
     } catch (e) {
       debugPrint('Error updating profile: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'প্রোফাইল আপডেট করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-      );
+  'ব্যর্থতা',
+  'প্রোফাইল আপডেট করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -219,13 +224,15 @@ class AdminProfileController extends GetxController {
             });
             profilePicture.value = imageUrl;
             Get.snackbar(
-              'সফল',
-              'প্রোফাইল ছবি সফলভাবে আপডেট করা হয়েছে',
-              backgroundColor: Colors.green.withValues(alpha: 0.9),
-              colorText: Colors.white,
-              snackPosition: SnackPosition.BOTTOM,
-              margin: const EdgeInsets.all(15),
-            );
+  'সফল',
+  'প্রোফাইল ছবি সফলভাবে আপডেট করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
           } else {
             throw Exception('R2 upload returned null URL');
           }
@@ -234,13 +241,15 @@ class AdminProfileController extends GetxController {
     } catch (e) {
       debugPrint('Error uploading profile picture: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'প্রোফাইল ছবি আপডেট করা যায়নি',
-        backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(15),
-      );
+  'ব্যর্থতা',
+  'প্রোফাইল ছবি আপডেট করা যায়নি',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       isLoading.value = false;
     }
@@ -260,24 +269,28 @@ class AdminProfileController extends GetxController {
       address.value = newAddress;
       
       Get.snackbar(
-        'সফল',
-        'আপনার ঠিকানা সফলভাবে আপডেট করা হয়েছে',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(15),
-      );
+  'সফল',
+  'আপনার ঠিকানা সফলভাবে আপডেট করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error updating address: $e');
       Get.snackbar(
-        'ত্রুটি',
-        'ঠিকানা আপডেট করতে সমস্যা হয়েছে',
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(15),
-      );
+  'ত্রুটি',
+  'ঠিকানা আপডেট করতে সমস্যা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -299,13 +312,15 @@ class AdminProfileController extends GetxController {
         final currentPasswordInDb = doc.data()?['password'] ?? '';
         if (currentPasswordInDb != oldPassword) {
           Get.snackbar(
-            'ভুল',
-            'পুরাতন পাসওয়ার্ড মিলেনি',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
-            colorText: Colors.white,
-            margin: const EdgeInsets.all(15),
-          );
+  'ভুল',
+  'পুরাতন পাসওয়ার্ড মিলেনি',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
           return false;
         }
 
@@ -315,26 +330,30 @@ class AdminProfileController extends GetxController {
         });
 
         Get.snackbar(
-          'সফল',
-          'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.9),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(15),
-        );
+  'সফল',
+  'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return true;
       }
       return false;
     } catch (e) {
       debugPrint('Error changing password: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'পাসওয়ার্ড পরিবর্তন করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(15),
-      );
+  'ব্যর্থতা',
+  'পাসওয়ার্ড পরিবর্তন করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;

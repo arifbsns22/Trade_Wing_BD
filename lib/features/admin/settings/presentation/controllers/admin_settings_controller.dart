@@ -337,25 +337,27 @@ class AdminSettingsController extends GetxController {
       });
 
       Get.snackbar(
-        'সফল',
-        'অ্যাপ্লিকেশন সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে',
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        colorText: Colors.black87,
-        borderColor: AppColors.primaryColor.withValues(alpha: 0.2),
-        borderWidth: 1,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
+  'সফল',
+  'অ্যাপ্লিকেশন সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error saving settings: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'সেটিংস সংরক্ষণ করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-      );
+  'ব্যর্থতা',
+  'সেটিংস সংরক্ষণ করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       isLoading.value = false;
     }
@@ -428,24 +430,28 @@ class AdminSettingsController extends GetxController {
         });
 
         Get.snackbar(
-          'সফল',
-          '${mode == 'light' ? 'লাইট মোড' : 'ডার্ক মোড'} লোগো পরিবর্তন করা হয়েছে',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-        );
+  'সফল',
+  '${mode == 'light' ? 'লাইট মোড' : 'ডার্ক মোড'} লোগো পরিবর্তন করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       }
     } catch (e) {
       debugPrint('Error picking logo: $e');
       Get.snackbar(
-        'ব্যর্থতা',
-        'লোগো আপলোড করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-      );
+  'ব্যর্থতা',
+  'লোগো আপলোড করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } finally {
       isLoading.value = false;
     }

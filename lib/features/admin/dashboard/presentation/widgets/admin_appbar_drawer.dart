@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.dart';
 import 'package:trade_wign_bd/features/admin/settings/presentation/screens/admin_settings_screen.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
+import 'package:trade_wign_bd/features/users/club/presentation/screens/business_club_screen.dart';
 import 'package:trade_wign_bd/common/ui/widgets/dynamic_app_logo.dart';
 import 'package:trade_wign_bd/features/admin/ecommerce/presentation/screens/product_list_screen.dart';
 import 'package:trade_wign_bd/features/admin/marketing/presentation/screens/banner_screen.dart';
@@ -90,7 +91,7 @@ class AdminAppbarDrawer extends StatelessWidget {
         'badge': null,
       },
       {'title': 'ট্রেনিং', 'icon': Icons.school_outlined, 'badge': null},
-      {'title': 'বিজনেস ক্লাব', 'icon': Icons.groups_outlined, 'badge': 'New'},
+      {'title': 'বিজনেস ক্লাব', 'icon': Icons.groups_outlined, 'badge': null},
       {'title': 'পেমেন্ট', 'icon': Icons.payment_outlined, 'badge': null},
       {'title': 'রিপোর্ট', 'icon': Icons.analytics_outlined, 'badge': null},
       {'title': 'সাপোর্ট', 'icon': Icons.headset_mic_outlined, 'badge': null},
@@ -392,19 +393,15 @@ class AdminAppbarDrawer extends StatelessWidget {
                               Get.to(() => const PackageListScreen());
                             } else {
                               Get.snackbar(
-                                subItem['title'] as String,
-                                'এই ফিচারটির কাজ চলমান আছে।',
-                                backgroundColor: Colors.white.withValues(
-                                  alpha: 0.9,
-                                ),
-                                colorText: Colors.black87,
-                                borderColor: AppColors.primaryColor.withValues(
-                                  alpha: 0.2,
-                                ),
-                                borderWidth: 1,
-                                snackPosition: SnackPosition.BOTTOM,
-                                margin: const EdgeInsets.all(16),
-                              );
+  subItem['title'] as String,
+  'এই ফিচারটির কাজ চলমান আছে।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                             }
                           },
                         );
@@ -472,20 +469,20 @@ class AdminAppbarDrawer extends StatelessWidget {
                         Get.offAll(() => const AdminDashboardScreen());
                       } else if (item['title'] == 'সেটিংস') {
                         Get.to(() => const AdminSettingsScreen());
+                      } else if (item['title'] == 'বিজনেস ক্লাব') {
+                        Get.to(() => const BusinessClubScreen());
                       } else {
                         // Show mock click feedback or route logic
                         Get.snackbar(
-                          item['title'] as String,
-                          'এই ফিচারটির কাজ চলমান আছে।',
-                          backgroundColor: Colors.white.withValues(alpha: 0.9),
-                          colorText: Colors.black87,
-                          borderColor: AppColors.primaryColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          borderWidth: 1,
-                          snackPosition: SnackPosition.BOTTOM,
-                          margin: const EdgeInsets.all(16),
-                        );
+  item['title'] as String,
+  'এই ফিচারটির কাজ চলমান আছে।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                       }
                     },
                   );

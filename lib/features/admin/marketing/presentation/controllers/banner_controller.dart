@@ -90,22 +90,28 @@ class BannerController extends GetxController {
       await _firestore.collection(collectionPath).add(newBanner.toFirestore());
 
       Get.snackbar(
-        'সফল',
-        'ব্যানার সফলভাবে যুক্ত করা হয়েছে',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+  'সফল',
+  'ব্যানার সফলভাবে যুক্ত করা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return true;
     } catch (e) {
       debugPrint('Error adding banner: $e');
       Get.snackbar(
-        'ত্রুটি',
-        'ব্যানার যুক্ত করা যায়নি: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ত্রুটি',
+  'ব্যানার যুক্ত করা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return false;
     } finally {
       isLoading.value = false;
@@ -135,10 +141,28 @@ class BannerController extends GetxController {
   Future<void> deleteBanner(String id) async {
     try {
       await _firestore.collection(collectionPath).doc(id).delete();
-      Get.snackbar('সফল', 'ব্যানার মুছে ফেলা হয়েছে');
+      Get.snackbar(
+  'সফল',
+  'ব্যানার মুছে ফেলা হয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } catch (e) {
       debugPrint('Error deleting banner: $e');
-      Get.snackbar('ত্রুটি', 'ব্যানার মোছা যায়নি: $e');
+      Get.snackbar(
+  'ত্রুটি',
+  'ব্যানার মোছা যায়নি: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 }

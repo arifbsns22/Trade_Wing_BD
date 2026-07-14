@@ -161,8 +161,16 @@ class _ReviewDialogWidgetState extends State<ReviewDialogWidget> {
 
   Future<void> _submit() async {
     if (_nameCtrl.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter your name.',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+  'Error',
+  'Please enter your name.',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
@@ -185,15 +193,26 @@ class _ReviewDialogWidgetState extends State<ReviewDialogWidget> {
     if (success) {
       Get.back();
       Get.snackbar(
-        'Thank you!',
-        'Your review has been submitted.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFBEF264),
-        colorText: const Color(0xFF034F4B),
-      );
+  'Thank you!',
+  'Your review has been submitted.',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     } else {
-      Get.snackbar('Error', 'Failed to submit review. Please try again.',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+  'Error',
+  'Failed to submit review. Please try again.',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
     }
   }
 }

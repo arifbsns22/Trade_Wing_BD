@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/controllers/cart_controller.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/widgets/ecommerce_appbar.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
@@ -639,11 +640,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (_offlineSenderMobileCtrl.text.trim().isEmpty ||
           _offlineTrxIdCtrl.text.trim().isEmpty) {
         Get.snackbar(
-          'ত্রুটি',
-          'অনুগ্রহ করে মোবাইল নম্বর এবং TrxID প্রদান করুন।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ত্রুটি',
+  'অনুগ্রহ করে মোবাইল নম্বর এবং TrxID প্রদান করুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
     }
@@ -658,38 +663,54 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       if (name.isEmpty || mobile.isEmpty || password.isEmpty) {
         Get.snackbar(
-          'ত্রুটি',
-          'দয়া করে সবগুলি প্রয়োজনীয় ঘর পূরণ করুন।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ত্রুটি',
+  'দয়া করে সবগুলি প্রয়োজনীয় ঘর পূরণ করুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
       if (password.length < 6) {
         Get.snackbar(
-          'ত্রুটি',
-          'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ত্রুটি',
+  'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
       if (password != confirmPassword) {
         Get.snackbar(
-          'ত্রুটি',
-          'পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মেলেনি।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ত্রুটি',
+  'পাসওয়ার্ড এবং কনফার্ম পাসওয়ার্ড মেলেনি।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
       if (!_regAcceptTerms) {
         Get.snackbar(
-          'ত্রুটি',
-          'দয়া করে শর্তাবলী মেনে নেওয়ার ঘরে টিক দিন।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ত্রুটি',
+  'দয়া করে শর্তাবলী মেনে নেওয়ার ঘরে টিক দিন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
 
@@ -720,31 +741,43 @@ class _PaymentScreenState extends State<PaymentScreen> {
         } else {
           setState(() => _isConfirming = false);
           Get.snackbar(
-            'লগইন ব্যর্থ',
-            'স্বয়ংক্রিয় লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে লগইন করুন।',
-            backgroundColor: Colors.redAccent,
-            colorText: Colors.white,
-          );
+  'লগইন ব্যর্থ',
+  'স্বয়ংক্রিয় লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে লগইন করুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         }
       } else {
         setState(() => _isConfirming = false);
         Get.snackbar(
-          'রেজিস্ট্রেশন ব্যর্থ',
-          regResult,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'রেজিস্ট্রেশন ব্যর্থ',
+  regResult,
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       }
     } else {
       // 2. Logged in user: Verify address
       final address = _addressCtrl.text.trim();
       if (address.isEmpty) {
         Get.snackbar(
-          'ঠিকানা প্রয়োজন',
-          'অনুগ্রহ করে আপনার ডেলিভারি ঠিকানা লিখুন।',
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+  'ঠিকানা প্রয়োজন',
+  'অনুগ্রহ করে আপনার ডেলিভারি ঠিকানা লিখুন।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
         return;
       }
 
@@ -823,14 +856,26 @@ class _PaymentScreenState extends State<PaymentScreen> {
           .collection('orders')
           .doc(orderId)
           .set(orderModel.toMap());
+
+      // Send real-time notification to Admin
+      await NotificationHelper.sendNotification(
+        title: 'নতুন অর্ডার এসেছে! 🛒',
+        body: 'গ্রাহক ${orderModel.userName} ৳${orderModel.totalAmount.toStringAsFixed(2)} মূল্যের একটি অর্ডার দিয়েছেন।',
+        type: 'new_order',
+        isAdmin: true,
+      );
     } catch (e) {
       setState(() => _isConfirming = false);
       Get.snackbar(
-        'ত্রুটি',
-        'অর্ডার সংরক্ষণ করতে সমস্যা হয়েছে: $e',
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+  'ত্রুটি',
+  'অর্ডার সংরক্ষণ করতে সমস্যা হয়েছে: $e',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
       return;
     }
 
@@ -844,15 +889,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
     Get.until((route) => route.isFirst); // go back to home
 
     Get.snackbar(
-      '🎉 অর্ডার সফল হয়েছে!',
-      '৳${widget.total.toStringAsFixed(2)} মূল্যের আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে।',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFBEF264),
-      colorText: AppColors.green,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 16,
-      duration: const Duration(seconds: 4),
-    );
+  '🎉 অর্ডার সফল হয়েছে!',
+  '৳${widget.total.toStringAsFixed(2)} মূল্যের আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে।',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
   }
 
   BoxDecoration _cardDecor() => BoxDecoration(

@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:trade_wign_bd/common/services/push_notification_service.dart';
 import '../../data/service/auth_service.dart';
 
 class AuthController extends GetxController {
@@ -97,6 +99,17 @@ class AuthController extends GetxController {
       // Save credentials for biometric login
       await _secureStorage.write(key: 'biometric_mobile', value: mobile);
       await _secureStorage.write(key: 'biometric_password', value: password);
+
+      // Initialize Push Notification token & listener
+      try {
+        if (Get.isRegistered<PushNotificationService>()) {
+          final pushService = Get.find<PushNotificationService>();
+          await pushService.saveTokenToUserDocument();
+          pushService.startNotificationListener();
+        }
+      } catch (e) {
+        debugPrint("Error initializing push service on login: $e");
+      }
 
       return 'success';
     } else {

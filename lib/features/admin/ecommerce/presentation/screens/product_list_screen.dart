@@ -157,10 +157,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ),
                           onPressed: () {
                             Get.snackbar(
-                              'স্ক্যানার',
-                              'বারকোড স্ক্যানার মডিউল চালু হচ্ছে...',
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
+  'স্ক্যানার',
+  'বারকোড স্ক্যানার মডিউল চালু হচ্ছে...',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                           },
                         ),
                         IconButton(

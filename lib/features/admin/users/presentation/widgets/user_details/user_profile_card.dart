@@ -142,7 +142,16 @@ class UserProfileCard extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: businessCode));
-                            Get.snackbar('Copied', 'Business code copied');
+                            Get.snackbar(
+  'Copied',
+  'Business code copied',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                           },
                           child: const Icon(Icons.copy, size: 16, color: Colors.grey),
                         ),
@@ -202,7 +211,16 @@ class UserProfileCard extends StatelessWidget {
             InkWell(
               onTap: () {
                 Clipboard.setData(ClipboardData(text: text));
-                Get.snackbar('Copied', 'Copied to clipboard', snackPosition: SnackPosition.BOTTOM);
+                Get.snackbar(
+  'Copied',
+  'Copied to clipboard',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
               },
               child: const Icon(Icons.copy, size: 14, color: Colors.grey),
             ),

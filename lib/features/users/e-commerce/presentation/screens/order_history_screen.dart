@@ -198,19 +198,15 @@ class OrderHistoryScreen extends StatelessWidget {
                           onPressed: () {
                             // TODO: Add items back to cart
                             Get.snackbar(
-                              'Coming Soon',
-                              'Re-order feature is coming soon!',
-                              backgroundColor: Colors.white.withValues(
-                                alpha: 0.9,
-                              ),
-                              colorText: Colors.black87,
-                              borderColor: AppColors.primaryColor.withValues(
-                                alpha: 0.2,
-                              ),
-                              borderWidth: 1,
-                              snackPosition: SnackPosition.BOTTOM,
-                              margin: const EdgeInsets.all(16),
-                            );
+  'Coming Soon',
+  'Re-order feature is coming soon!',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                           },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(

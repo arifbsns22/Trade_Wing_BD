@@ -80,28 +80,7 @@ class AdminProfileScreen extends StatelessWidget {
                                   color: Colors.black87,
                                 ),
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 8,
-                                    ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.notifications_none_rounded,
-                                    color: Colors.black87,
-                                    size: 22,
-                                  ),
-                                  onPressed: () {
-                                    // Handle notification action
-                                  },
-                                ),
-                              ),
+                              const SizedBox(width: 48),
                             ],
                           ),
                           const SizedBox(height: 20),
@@ -376,7 +355,16 @@ class AdminProfileScreen extends StatelessWidget {
                       leadingIcon: Icons.lock_outline_rounded,
                       title: 'পাসওয়ার্ড পরিবর্তন',
                       onTap: () {
-                        Get.snackbar('তথ্য', 'পাসওয়ার্ড পরিবর্তন ফিচারটি শীঘ্রই আসছে');
+                        Get.snackbar(
+  'তথ্য',
+  'পাসওয়ার্ড পরিবর্তন ফিচারটি শীঘ্রই আসছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                       },
                     ),
 
@@ -384,7 +372,16 @@ class AdminProfileScreen extends StatelessWidget {
                       leadingIcon: Icons.help_outline_rounded,
                       title: 'সহায়তা ও সমর্থন',
                       onTap: () {
-                        Get.snackbar('তথ্য', 'সহায়তা ও সমর্থন সেন্টার শীঘ্রই চালু হবে');
+                        Get.snackbar(
+  'তথ্য',
+  'সহায়তা ও সমর্থন সেন্টার শীঘ্রই চালু হবে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                       },
                     ),
 

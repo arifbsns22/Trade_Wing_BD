@@ -66,10 +66,15 @@ class CreateFloatingButton extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Get.snackbar(
-                    'অর্ডার',
-                    'নতুন অর্ডার তৈরির পেইজ মডিউল নির্মাণাধীন রয়েছে',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+  'অর্ডার',
+  'নতুন অর্ডার তৈরির পেইজ মডিউল নির্মাণাধীন রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                 },
               ),
               const SizedBox(height: 12),
@@ -112,10 +117,15 @@ class CreateFloatingButton extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Get.snackbar(
-                    'প্রমোশন',
-                    'নতুন প্রমোশন তৈরির পেইজ মডিউল নির্মাণাধীন রয়েছে',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+  'প্রমোশন',
+  'নতুন প্রমোশন তৈরির পেইজ মডিউল নির্মাণাধীন রয়েছে',
+  backgroundColor: Colors.white.withValues(alpha: 0.9),
+  colorText: Colors.black87,
+  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+  borderWidth: 1,
+  snackPosition: SnackPosition.BOTTOM,
+  margin: const EdgeInsets.all(16),
+);
                 },
               ),
               const SizedBox(height: 12),
