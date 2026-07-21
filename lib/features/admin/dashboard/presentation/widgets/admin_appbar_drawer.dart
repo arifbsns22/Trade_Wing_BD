@@ -18,6 +18,9 @@ import 'package:trade_wign_bd/features/admin/users/presentation/screens/add_user
 import 'dart:convert';
 import 'package:trade_wign_bd/features/common/profile/presentation/controllers/admin_profile_controller.dart';
 import 'package:trade_wign_bd/features/admin/packages/presentation/screens/package_list_screen.dart';
+import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/admin_operator_setup_screens.dart';
+import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/admin_offer_creation_screens.dart';
+import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/drive_order_request_screen.dart';
 
 class AdminAppbarDrawer extends StatelessWidget {
   const AdminAppbarDrawer({super.key});
@@ -81,6 +84,11 @@ class AdminAppbarDrawer extends StatelessWidget {
         'title': 'ড্রাইভ প্যাকেজ',
         'icon': Icons.phone_android_outlined,
         'badge': null,
+        'subItems': [
+          {'title': 'অপারেটর সেটআপ', 'icon': Icons.cell_tower_outlined},
+          {'title': 'ড্রাইভ অর্ডার সমূহ', 'icon': Icons.list_alt_outlined},
+          {'title': 'ড্রাইভ অফার তৈরি', 'icon': Icons.add_to_photos_outlined},
+        ],
       },
       {'title': 'রিসেলিং', 'icon': Icons.storefront_outlined, 'badge': null},
       {'title': 'ভেন্ডরশিপ', 'icon': Icons.handshake_outlined, 'badge': null},
@@ -391,6 +399,12 @@ class AdminAppbarDrawer extends StatelessWidget {
                               Get.to(() => const BannerScreen());
                             } else if (subItem['title'] == 'এড প্যাকেজ') {
                               Get.to(() => const PackageListScreen());
+                            } else if (subItem['title'] == 'অপারেটর সেটআপ') {
+                              Get.to(() => const AdminOperatorSetupScreen());
+                            } else if (subItem['title'] == 'ড্রাইভ অর্ডার সমূহ') {
+                              Get.to(() => const DriveOrderRequestScreen());
+                            } else if (subItem['title'] == 'ড্রাইভ অফার তৈরি') {
+                              Get.to(() => const AdminOfferCreationScreen());
                             } else {
                               Get.snackbar(
   subItem['title'] as String,

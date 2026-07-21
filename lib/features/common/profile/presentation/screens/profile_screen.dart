@@ -64,21 +64,10 @@ class UserProfileScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           // Header: Custom Profile AppBar
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: Colors.black87,
-                                    size: 20,
-                                  ),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                              ),
-                              const Text(
+                          const SizedBox(
+                            height: 48,
+                            child: Center(
+                              child: Text(
                                 'প্রোফাইল',
                                 style: TextStyle(
                                   fontSize: 18,
@@ -86,34 +75,7 @@ class UserProfileScreen extends StatelessWidget {
                                   color: Colors.black87,
                                 ),
                               ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.05,
-                                        ),
-                                        blurRadius: 8,
-                                      ),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.notifications_none_rounded,
-                                      color: Colors.black87,
-                                      size: 22,
-                                    ),
-                                    onPressed: () {
-                                      // Handle notification action
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                           const SizedBox(height: 20),
 

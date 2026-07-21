@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/order_history_screen.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 import 'package:trade_wign_bd/uitls/constants/app_texts.dart';
 import 'package:trade_wign_bd/uitls/constants/assets_path/features_path.dart';
@@ -7,6 +8,7 @@ import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/all
 import 'package:trade_wign_bd/features/users/home/presentation/widgets/support_sheet.dart';
 import 'package:trade_wign_bd/features/common/coming_soon_popuo.dart';
 import 'package:trade_wign_bd/features/users/club/presentation/screens/business_club_screen.dart';
+import 'package:trade_wign_bd/features/users/drive_pack/presentation/screens/user_drive_pack_screens.dart';
 
 class FeatureItem {
   final String title;
@@ -27,6 +29,9 @@ final List<FeatureItem> featureList = [
   FeatureItem(
     title: AppTexts.drivePackage,
     imagePath: FeaturesPath.drivePackage,
+    onTap: () {
+      Get.to(() => const UserDrivePackScreen());
+    },
   ),
   FeatureItem(title: AppTexts.reselling, imagePath: FeaturesPath.reselling),
   FeatureItem(title: AppTexts.vendorship, imagePath: FeaturesPath.vendorship),
@@ -45,10 +50,14 @@ final List<FeatureItem> featureList = [
     title: AppTexts.support,
     imagePath: FeaturesPath.support,
     onTap: () {
-      Get.bottomSheet(
-        const SupportSheet(),
-        isScrollControlled: true,
-      );
+      Get.bottomSheet(const SupportSheet(), isScrollControlled: true);
+    },
+  ),
+  FeatureItem(
+    title: "আমার অর্ডার",
+    imagePath: "assets/color_icons/shopping-bag.png",
+    onTap: () {
+      Get.to(() => const OrderHistoryScreen());
     },
   ),
 ];

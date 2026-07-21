@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trade_wign_bd/common/services/push_notification_service.dart';
 import '../../data/service/auth_service.dart';
 
@@ -142,6 +143,26 @@ class AuthController extends GetxController {
     await prefs.remove(_userNameKey);
     await prefs.remove(_userMobileKey);
     await prefs.remove(_userRoleKey);
+  }
+
+  // Verify if entered password matches the logged-in user's actual password
+  Future<bool> verifyUserPassword(String enteredPassword) async {
+    final mobile = currentUserMobile.value;
+    if (mobile.isEmpty) return false;
+    
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(mobile).get();
+      if (doc.exists) {
+        final savedPassword = doc.data()?['password'] as String?;
+        return savedPassword != null && savedPassword == enteredPassword;
+      }
+    } catch (e) {
+      debugPrint('Error verifying password via Firestore: $e');
+    }
+    
+    // Fallback: check local secure storage (useful for offline-friendly flows)
+    final localPassword = await _secureStorage.read(key: 'biometric_password');
+    return localPassword != null && localPassword == enteredPassword;
   }
 
   // Biometric Login (Silently fetches credentials and logs in)
