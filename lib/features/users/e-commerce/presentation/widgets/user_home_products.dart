@@ -42,7 +42,7 @@ class UserHomeProducts extends StatelessWidget {
 
       // Here we filter the reactive products list based on the widget's parameters
       List<Product> filteredProducts = controller.products
-          .where((p) => p.status == 'public')
+          .where((p) => p.status.toLowerCase() == 'public')
           .toList();
 
       switch (categoryType) {

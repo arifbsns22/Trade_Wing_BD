@@ -13,56 +13,59 @@ import 'package:trade_wign_bd/features/users/club/presentation/screens/business_
 import 'package:trade_wign_bd/features/users/drive_pack/presentation/screens/user_drive_pack_screens.dart';
 import 'package:trade_wign_bd/features/users/traning/presentation/screens/user_traning_screen.dart';
 
-class FeatureItem {
+class AllServicesItem {
   final String title;
   final String imagePath;
   final VoidCallback? onTap;
 
-  FeatureItem({required this.title, required this.imagePath, this.onTap});
+  AllServicesItem({required this.title, required this.imagePath, this.onTap});
 }
 
-final List<FeatureItem> featureList = [
-  FeatureItem(
+final List<AllServicesItem> featureList = [
+  AllServicesItem(
     title: AppTexts.ecommerce,
     imagePath: FeaturesPath.ecommerce,
     onTap: () {
       Get.to(() => const AllProductsScreen());
     },
   ),
-  FeatureItem(
+  AllServicesItem(
     title: AppTexts.drivePackage,
     imagePath: FeaturesPath.drivePackage,
     onTap: () {
       Get.to(() => const UserDrivePackScreen());
     },
   ),
-  FeatureItem(title: AppTexts.reselling, imagePath: FeaturesPath.reselling),
-  FeatureItem(title: AppTexts.vendorship, imagePath: FeaturesPath.vendorship),
+  AllServicesItem(title: AppTexts.reselling, imagePath: FeaturesPath.reselling),
+  AllServicesItem(
+    title: AppTexts.vendorship,
+    imagePath: FeaturesPath.vendorship,
+  ),
 
-  FeatureItem(title: AppTexts.parcel, imagePath: FeaturesPath.parcel),
-  FeatureItem(
+  AllServicesItem(title: AppTexts.parcel, imagePath: FeaturesPath.parcel),
+  AllServicesItem(
     title: AppTexts.training,
     imagePath: FeaturesPath.training,
     onTap: () {
       Get.to(() => const UserTraningScreen());
     },
   ),
-  FeatureItem(
+  AllServicesItem(
     title: AppTexts.businessClub,
     imagePath: FeaturesPath.businessClub,
     onTap: () {
       Get.to(() => const BusinessClubScreen());
     },
   ),
-  FeatureItem(title: AppTexts.others, imagePath: FeaturesPath.others),
-  FeatureItem(
+  AllServicesItem(title: AppTexts.others, imagePath: FeaturesPath.others),
+  AllServicesItem(
     title: AppTexts.support,
     imagePath: FeaturesPath.support,
     onTap: () {
       Get.bottomSheet(const SupportSheet(), isScrollControlled: true);
     },
   ),
-  FeatureItem(
+  AllServicesItem(
     title: "আমার অর্ডার",
     imagePath: "assets/color_icons/shopping-bag.png",
     onTap: () {
@@ -71,13 +74,17 @@ final List<FeatureItem> featureList = [
   ),
 ];
 
-class FeatureGrid extends StatelessWidget {
-  final List<FeatureItem> features;
-  final void Function(FeatureItem)? onTap;
+class AllServicesGrid extends StatelessWidget {
+  final List<AllServicesItem> features;
+  final void Function(AllServicesItem)? onTap;
 
-  const FeatureGrid({super.key, required this.features, this.onTap});
+  const AllServicesGrid({super.key, required this.features, this.onTap});
 
-  void _showTrainingRequiredDialog(BuildContext context, String roleName, int pendingCount) {
+  void _showTrainingRequiredDialog(
+    BuildContext context,
+    String roleName,
+    int pendingCount,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -96,7 +103,11 @@ class FeatureGrid extends StatelessWidget {
         ),
         content: Text(
           'আপনার বর্তমান রোল ($roleName)-এর জন্য আরও $pendingCount টি ট্রেনিং বাকি আছে। অ্যাপের সকল সুবিধা ব্যবহার করতে প্রথমে ট্রেনিংগুলো সম্পন্ন করুন।',
-          style: const TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
+          style: const TextStyle(
+            fontSize: 13,
+            height: 1.4,
+            color: Colors.black87,
+          ),
         ),
         actions: [
           TextButton(
@@ -107,7 +118,9 @@ class FeatureGrid extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.green,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
               Navigator.pop(context);
@@ -126,7 +139,7 @@ class FeatureGrid extends StatelessWidget {
     final trainingController = Get.put(TrainingController());
 
     // Split features into rows of 5 items
-    final List<List<FeatureItem>> rows = [];
+    final List<List<AllServicesItem>> rows = [];
     for (var i = 0; i < features.length; i += 5) {
       rows.add(
         features.sublist(i, i + 5 > features.length ? features.length : i + 5),
@@ -145,28 +158,42 @@ class FeatureGrid extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () async {
                       final title = feature.title;
-                      final isAlwaysUnlocked = title == AppTexts.training ||
+                      final isAlwaysUnlocked =
+                          title == AppTexts.training ||
                           title == AppTexts.support ||
                           title == "আমার অর্ডার";
 
                       if (!isAlwaysUnlocked) {
-                        final currentRole = authController.currentUserRole.value;
-                        final currentMobile = authController.currentUserMobile.value.trim();
-                        final userId = currentMobile.isNotEmpty ? currentMobile : 'guest_user';
+                        final currentRole =
+                            authController.currentUserRole.value;
+                        final currentMobile = authController
+                            .currentUserMobile
+                            .value
+                            .trim();
+                        final userId = currentMobile.isNotEmpty
+                            ? currentMobile
+                            : 'guest_user';
 
-                        final pendingCount = await trainingController.getPendingTrainingsCountAsync(
-                          userRole: currentRole,
-                          userId: userId,
-                        );
+                        final pendingCount = await trainingController
+                            .getPendingTrainingsCountAsync(
+                              userRole: currentRole,
+                              userId: userId,
+                            );
 
                         if (pendingCount > 0) {
                           trainingController.checkAndSendTrainingNotification(
                             userId: userId,
                             userRole: currentRole,
                           );
-                          final roleBangla = TrainingController.getRoleBangla(currentRole);
+                          final roleBangla = TrainingController.getRoleBangla(
+                            currentRole,
+                          );
                           if (context.mounted) {
-                            _showTrainingRequiredDialog(context, roleBangla, pendingCount);
+                            _showTrainingRequiredDialog(
+                              context,
+                              roleBangla,
+                              pendingCount,
+                            );
                           }
                           return;
                         }

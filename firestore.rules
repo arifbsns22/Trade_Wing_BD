@@ -1,18 +1,38 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Storefront & Catalog Data: Public read access for all app users (guest + logged in)
+    match /products/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /categories/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /brands/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /marketing_banners/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /product_types/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /units/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /packages/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /drive_packages/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /operators/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /settings/{doc} { allow read: if true; allow write: if request.auth != null; }
+    match /product_reviews/{doc} { allow read: if true; allow write: if request.auth != null; }
+
+    // User-specific Data & Operations
+    match /users/{doc} { allow read, write: if true; }
+    match /users/{doc}/{allPaths=**} { allow read, write: if true; }
+    match /orders/{doc} { allow read, write: if true; }
+    match /drive_orders/{doc} { allow read, write: if true; }
+    match /recharges/{doc} { allow read, write: if true; }
+    match /package_purchases/{doc} { allow read, write: if true; }
+    match /trainings/{doc} { allow read, write: if true; }
+    match /trainings/{doc}/{allPaths=**} { allow read, write: if true; }
+    match /{path=**}/attendance/{doc} { allow read, write: if true; }
+
+    // Permanent Global Fallback: Public read allowed, write restricted to authenticated sessions
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 7, 21);
+      allow read: if true;
+      allow write: if request.auth != null;
     }
   }
 }
+
+

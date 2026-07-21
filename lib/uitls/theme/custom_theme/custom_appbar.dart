@@ -10,6 +10,7 @@ import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.da
 import 'package:trade_wign_bd/features/common/custom_search_bar.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/controllers/cart_controller.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/cart_screen.dart';
+import 'package:trade_wign_bd/features/users/traning/presentation/screens/user_traning_screen.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -47,13 +48,29 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 Row(
                   children: [
                     // Profile Avatar
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.grey[200],
-                      backgroundImage: const AssetImage(
-                        'assets/color_icons/avater.png',
-                      ),
-                    ),
+                    Obx(() {
+                      final authController = Get.find<AuthController>();
+                      final isLoggedIn =
+                          authController.currentUserRole.value != 'Guest Customer' &&
+                          authController.currentUserMobile.value.isNotEmpty;
+
+                      String? photoUrl;
+                      if (isLoggedIn) {
+                        final profileController = Get.put(AdminProfileController());
+                        final pic = profileController.profilePicture.value.trim();
+                        if (pic.isNotEmpty) {
+                          photoUrl = pic;
+                        }
+                      }
+
+                      return CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: (photoUrl != null && photoUrl.startsWith('http'))
+                            ? NetworkImage(photoUrl) as ImageProvider
+                            : const AssetImage('assets/color_icons/avater.png'),
+                      );
+                    }),
                     const SizedBox(width: 10),
 
                     // Name and Check Points
@@ -517,6 +534,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
                       onTap: () {
                         if (!isRead) {
                           doc.reference.update({'isRead': true});
+                        }
+                        final type = data['type'] as String?;
+                        if (type == 'training') {
+                          Navigator.pop(context);
+                          Get.to(() => const UserTraningScreen());
                         }
                       },
                       child: Padding(

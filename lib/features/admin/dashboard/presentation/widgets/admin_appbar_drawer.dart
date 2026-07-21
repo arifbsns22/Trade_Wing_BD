@@ -21,6 +21,7 @@ import 'package:trade_wign_bd/features/admin/packages/presentation/screens/packa
 import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/admin_operator_setup_screens.dart';
 import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/admin_offer_creation_screens.dart';
 import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/drive_order_request_screen.dart';
+import 'package:trade_wign_bd/features/admin/traning/presentation/screens/all_traning_screen.dart';
 
 class AdminAppbarDrawer extends StatelessWidget {
   const AdminAppbarDrawer({super.key});
@@ -483,6 +484,8 @@ class AdminAppbarDrawer extends StatelessWidget {
                         Get.offAll(() => const AdminDashboardScreen());
                       } else if (item['title'] == 'সেটিংস') {
                         Get.to(() => const AdminSettingsScreen());
+                      } else if (item['title'] == 'ট্রেনিং') {
+                        Get.to(() => const AllTraningScreen());
                       } else if (item['title'] == 'বিজনেস ক্লাব') {
                         Get.to(() => const BusinessClubScreen());
                       } else {

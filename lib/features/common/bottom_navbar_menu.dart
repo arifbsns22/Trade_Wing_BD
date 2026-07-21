@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:trade_wign_bd/common/ui/screens/comming_soon.dart';
+import 'package:trade_wign_bd/features/users/all_services/presentation/screens/all_services_screen.dart';
 import 'package:trade_wign_bd/features/users/home/presentation/screens/user_home_screen.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/all_products_screen.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
@@ -26,7 +26,7 @@ class _BottomNavBarMenuState extends State<BottomNavBarMenu> {
 
   late final List<Widget> _pages = [
     const UserDashboardScreen(),
-    const CommingSoon(),
+    const AllServicesScreen(),
     const AllProductsScreen(),
     const UserPackagesScreen(),
     Obx(() {

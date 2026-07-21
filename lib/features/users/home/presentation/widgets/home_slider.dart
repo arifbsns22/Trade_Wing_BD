@@ -27,6 +27,7 @@ class HomeSlider extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
+          debugPrint('HomeSlider snapshot error: ${snapshot.error}');
           return const SizedBox(
             height: 160,
             child: Center(child: Text('Error loading banners')),
@@ -42,6 +43,16 @@ class HomeSlider extends StatelessWidget {
 
           final banners = snapshot.data!.docs
               .map((doc) => BannerModel.fromFirestore(doc))
+              .where((banner) {
+                if (banner.targetRoles.isEmpty) return true;
+                final roleLower = userRole.toLowerCase().trim();
+                return banner.targetRoles.any((r) {
+                  final rLower = r.toLowerCase().trim();
+                  if (rLower == roleLower) return true;
+                  if (roleLower == 'guest customer' && (rLower == 'customer' || rLower == 'guest')) return true;
+                  return false;
+                });
+              })
               .toList();
 
           if (banners.isEmpty) {
