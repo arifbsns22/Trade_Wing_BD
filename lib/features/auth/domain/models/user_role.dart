@@ -2,6 +2,7 @@ enum UserRole {
   superAdmin,
   guestCustomer,
   customer,
+  activeCustomer,
   brandPromoter,
   salesPartner,
   seniorSalesPartner,
@@ -9,6 +10,7 @@ enum UserRole {
   dealer,
   seniorDealer,
   masterDealer,
+  regionalDistributor,
 }
 
 extension UserRoleExtension on UserRole {
@@ -19,7 +21,9 @@ extension UserRoleExtension on UserRole {
       case UserRole.guestCustomer:
         return 'অতিথি গ্রাহক';
       case UserRole.customer:
-        return 'গ্রাহক';
+        return 'কাস্টমার';
+      case UserRole.activeCustomer:
+        return 'সক্রিয় কাস্টমার';
       case UserRole.brandPromoter:
         return 'ব্র্যান্ড প্রমোটর';
       case UserRole.salesPartner:
@@ -34,6 +38,8 @@ extension UserRoleExtension on UserRole {
         return 'সিনিয়র ডিলার';
       case UserRole.masterDealer:
         return 'মাস্টার ডিলার';
+      case UserRole.regionalDistributor:
+        return 'রিজিওনাল ডিস্ট্রিবিউটর';
     }
   }
 
@@ -45,6 +51,8 @@ extension UserRoleExtension on UserRole {
         return 'Guest Customer';
       case UserRole.customer:
         return 'Customer';
+      case UserRole.activeCustomer:
+        return 'Active Customer';
       case UserRole.brandPromoter:
         return 'Brand Promoter';
       case UserRole.salesPartner:
@@ -59,31 +67,38 @@ extension UserRoleExtension on UserRole {
         return 'Senior Dealer';
       case UserRole.masterDealer:
         return 'Master Dealer';
+      case UserRole.regionalDistributor:
+        return 'Regional Distributor';
     }
   }
 
   static UserRole fromString(String role) {
-    switch (role) {
-      case 'Super Admin':
+    final normalized = role.trim().toLowerCase();
+    switch (normalized) {
+      case 'super admin':
         return UserRole.superAdmin;
-      case 'Guest Customer':
+      case 'guest customer':
         return UserRole.guestCustomer;
-      case 'Customer':
+      case 'customer':
         return UserRole.customer;
-      case 'Brand Promoter':
+      case 'active customer':
+        return UserRole.activeCustomer;
+      case 'brand promoter':
         return UserRole.brandPromoter;
-      case 'Sales Partner':
+      case 'sales partner':
         return UserRole.salesPartner;
-      case 'Senior Sales Partner':
+      case 'senior sales partner':
         return UserRole.seniorSalesPartner;
-      case 'Sub Dealer':
+      case 'sub dealer':
         return UserRole.subDealer;
-      case 'Dealer':
+      case 'dealer':
         return UserRole.dealer;
-      case 'Senior Dealer':
+      case 'senior dealer':
         return UserRole.seniorDealer;
-      case 'Master Dealer':
+      case 'master dealer':
         return UserRole.masterDealer;
+      case 'regional distributor':
+        return UserRole.regionalDistributor;
       default:
         return UserRole.customer;
     }

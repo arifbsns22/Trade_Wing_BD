@@ -44,6 +44,18 @@ class AuthController extends GetxController {
       currentUserName.value = prefs.getString(_userNameKey) ?? '';
       currentUserMobile.value = prefs.getString(_userMobileKey) ?? '';
       currentUserRole.value = prefs.getString(_userRoleKey) ?? 'Customer';
+
+      // Initialize Push Notification token & listener on auto-login
+      try {
+        if (Get.isRegistered<PushNotificationService>()) {
+          final pushService = Get.find<PushNotificationService>();
+          pushService.saveTokenToUserDocument();
+          pushService.startNotificationListener();
+        }
+      } catch (e) {
+        debugPrint("Error initializing push service on checkLoginStatus: $e");
+      }
+
       return true;
     }
     return false;

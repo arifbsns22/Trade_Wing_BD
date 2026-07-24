@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/domain/models/recharge_model.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/domain/models/operator_model.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 
 class AdminDriveOrdersController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -118,6 +119,20 @@ class AdminDriveOrdersController extends GetxController {
           .collection('mobile_recharges')
           .doc(transactionId)
           .update({'status': newStatus});
+
+      // Send status update notification to the user
+      final orderIndex = allOrders.indexWhere((o) => o.transactionId == transactionId);
+      if (orderIndex != -1) {
+        final order = allOrders[orderIndex];
+        String statusLabel = newStatus == 'completed' ? 'সম্পন্ন' : (newStatus == 'failed' ? 'ব্যর্থ' : 'পেন্ডিং');
+        String titleBangla = order.rechargeType == 'drive' ? 'ড্রাইভ অফার অর্ডার' : 'রিচার্জের অনুরোধ';
+        await NotificationHelper.sendNotification(
+          title: '$titleBangla আপডেট',
+          body: 'আপনার ৳${order.amount} (${order.mobileNumber}) $titleBangla টি ${statusLabel} হয়েছে।',
+          type: 'recharge_update',
+          userMobile: order.userMobile,
+        );
+      }
 
       Get.snackbar(
         'সফল',

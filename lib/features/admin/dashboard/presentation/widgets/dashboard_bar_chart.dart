@@ -13,15 +13,81 @@ class DashboardBarChart extends StatelessWidget {
     final AdminDashboardController controller =
         Get.find<AdminDashboardController>();
 
+    // 10 distinct beautiful soft/pastel linear gradients for the rods
+    final List<LinearGradient> rodGradients = [
+      const LinearGradient(
+        colors: [Color(0xFFEF9A9A), Color(0xFFE57373)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFFCE93D8), Color(0xFFBA68C8)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFF9FA8DA), Color(0xFF7986CB)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFF90CAF9), Color(0xFF64B5F6)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFF80DEEA), Color(0xFF4DD0E1)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFF80CBC4), Color(0xFF4DB6AC)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFFA5D6A7), Color(0xFF81C784)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFFE6EE9C), Color(0xFFD4E157)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFFFFE082), Color(0xFFFFD54F)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+      const LinearGradient(
+        colors: [Color(0xFFFFCC80), Color(0xFFFFB74D)],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      ),
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFFFF3E0).withValues(alpha: 0.65), // Extremely soft orange
+            const Color(0xFFF3E5F5).withValues(alpha: 0.65), // Extremely soft purple
+            const Color(0xFFE3F2FD).withValues(alpha: 0.65), // Extremely soft blue
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xffAA7BFF).withValues(alpha: 0.15),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 15,
             offset: const Offset(0, 8),
           ),
         ],
@@ -32,50 +98,59 @@ class DashboardBarChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ইউজার রোল বিশ্লেষণ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ইউজার রোল বিশ্লেষণ',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'প্রতিটি রোলে নিবন্ধিত ইউজারের সংখ্যা',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      'প্রতিটি রোলে নিবন্ধিত ইউজারের সংখ্যা',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xffAA7BFF).withValues(alpha: 0.1),
+                  color: const Color(0xFFF3E5F5),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFE1BEE7),
+                  ),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: 7,
+                      height: 7,
                       decoration: const BoxDecoration(
-                        color: Color(0xffAA7BFF),
+                        color: Color(0xFF9C27B0),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 6),
                     const Text(
-                      'অ্যাক্টিভ ইউজার',
+                      'রোলসমূহ',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xffAA7BFF),
+                        color: Color(0xFF7B1FA2),
                       ),
                     ),
                   ],
@@ -108,20 +183,13 @@ class DashboardBarChart extends StatelessWidget {
                   barRods: [
                     BarChartRodData(
                       toY: values[i].toDouble(),
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xffAA7BFF),
-                          AppColors.primaryColor,
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
-                      width: 22,
-                      borderRadius: BorderRadius.circular(6),
+                      gradient: rodGradients[i % rodGradients.length],
+                      width: 16,
+                      borderRadius: BorderRadius.circular(4),
                       backDrawRodData: BackgroundBarChartRodData(
                         show: true,
                         toY: maxY,
-                        color: Colors.grey.shade50,
+                        color: Colors.black.withValues(alpha: 0.02),
                       ),
                     ),
                   ],
@@ -135,12 +203,11 @@ class DashboardBarChart extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: SizedBox(
-                  width:
-                      roles.length * 60.0 >
+                  width: roles.length * 60.0 >
                           MediaQuery.of(context).size.width - 80
                       ? roles.length * 60.0
                       : MediaQuery.of(context).size.width - 80,
-                  height: 200,
+                  height: 220,
                   child: BarChart(
                     BarChartData(
                       barGroups: barGroups,
@@ -153,9 +220,8 @@ class DashboardBarChart extends StatelessWidget {
                         drawHorizontalLine: true,
                         getDrawingHorizontalLine: (value) {
                           return FlLine(
-                            color: Colors.grey.shade100,
-                            strokeWidth: 1.5,
-                            dashArray: [5, 5],
+                            color: Colors.black.withValues(alpha: 0.03),
+                            strokeWidth: 1,
                           );
                         },
                       ),
@@ -164,22 +230,26 @@ class DashboardBarChart extends StatelessWidget {
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            reservedSize: 42,
+                            reservedSize: 48,
                             getTitlesWidget: (value, meta) {
                               if (value.toInt() >= 0 &&
                                   value.toInt() < roles.length) {
                                 return SideTitleWidget(
                                   meta: meta,
                                   space: 8,
-                                  child: Text(
-                                    roles[value.toInt()],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 9,
-                                      color: Colors.grey,
+                                  child: Container(
+                                    constraints: const BoxConstraints(maxWidth: 55),
+                                    child: Text(
+                                      roles[value.toInt()],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 9,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
                                   ),
                                 );
                               }
@@ -190,8 +260,8 @@ class DashboardBarChart extends StatelessWidget {
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            reservedSize: 30,
-                            interval: maxY > 10 ? maxY / 4 : 2,
+                            reservedSize: 32,
+                            interval: maxY > 10 ? maxY / 4 : 2.0,
                             getTitlesWidget: (value, meta) {
                               return SideTitleWidget(
                                 meta: meta,
@@ -200,10 +270,10 @@ class DashboardBarChart extends StatelessWidget {
                                   controller.toBengaliNumber(
                                     value.toInt().toString(),
                                   ),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                    color: Colors.grey,
+                                    fontSize: 9,
+                                    color: Colors.grey.shade600,
                                   ),
                                 ),
                               );
@@ -221,28 +291,35 @@ class DashboardBarChart extends StatelessWidget {
                       barTouchData: BarTouchData(
                         enabled: true,
                         touchTooltipData: BarTouchTooltipData(
-                          getTooltipColor: (group) => Colors.black87,
+                          getTooltipColor: (group) {
+                            // Match the tooltip background color with the rod color
+                            final int index = group.x;
+                            if (index >= 0 && index < rodGradients.length) {
+                              return rodGradients[index % rodGradients.length].colors.first.withValues(alpha: 0.95);
+                            }
+                            return const Color(0xFF08B3AC);
+                          },
+                          tooltipBorderRadius: BorderRadius.circular(10),
                           tooltipPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                            horizontal: 12,
+                            vertical: 8,
                           ),
                           tooltipMargin: 8,
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                             return BarTooltipItem(
                               "",
                               const TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 11,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
-
                               children: <TextSpan>[
                                 TextSpan(
                                   text:
                                       '${controller.toBengaliNumber(rod.toY.toInt().toString())} জন',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

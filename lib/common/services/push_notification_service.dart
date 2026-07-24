@@ -241,19 +241,30 @@ class PushNotificationService extends GetxService {
         query = query.where('userMobile', isEqualTo: mobile);
       }
 
-      final DateTime startTime = DateTime.now();
+      bool isFirstSnapshot = true;
+      final Set<String> existingDocIds = {};
 
-      query
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startTime))
-          .snapshots()
-          .listen((snapshot) {
+      query.snapshots().listen((snapshot) {
+        if (isFirstSnapshot) {
+          for (var doc in snapshot.docs) {
+            existingDocIds.add(doc.id);
+          }
+          isFirstSnapshot = false;
+          debugPrint("PushNotificationService: loaded ${existingDocIds.length} historical notifications.");
+          return;
+        }
+
         for (var change in snapshot.docChanges) {
           if (change.type == DocumentChangeType.added) {
-            final data = change.doc.data() as Map<String, dynamic>?;
-            if (data != null) {
-              final title = data['title'] ?? 'Notification';
-              final body = data['body'] ?? '';
-              _showLocalNotification(title, body, data);
+            final docId = change.doc.id;
+            if (!existingDocIds.contains(docId)) {
+              existingDocIds.add(docId);
+              final data = change.doc.data() as Map<String, dynamic>?;
+              if (data != null) {
+                final title = data['title'] ?? 'Notification';
+                final body = data['body'] ?? '';
+                _showLocalNotification(title, body, data);
+              }
             }
           }
         }

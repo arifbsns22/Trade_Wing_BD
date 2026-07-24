@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 import '../controllers/banner_controller.dart';
 
@@ -36,6 +37,8 @@ class _AddBannerWidgetState extends State<AddBannerWidget> {
   final List<String> _selectedRoles = [];
 
   XFile? _selectedImage;
+  DateTime? _startDate;
+  DateTime? _expiryDate;
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -46,44 +49,102 @@ class _AddBannerWidgetState extends State<AddBannerWidget> {
     }
   }
 
+  Future<void> _selectDateTime(BuildContext context, bool isStartDate) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2025),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primaryColor,
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      if (!context.mounted) return;
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: AppColors.primaryColor,
+                onPrimary: Colors.white,
+                onSurface: Colors.black87,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedTime != null) {
+        final fullDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        setState(() {
+          if (isStartDate) {
+            _startDate = fullDateTime;
+          } else {
+            _expiryDate = fullDateTime;
+          }
+        });
+      }
+    }
+  }
+
   void _submit() async {
     if (_titleController.text.trim().isEmpty) {
       Get.snackbar(
-  'ত্রুটি',
-  'দয়া করে ব্যানারের টাইটেল দিন',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ত্রুটি',
+        'দয়া করে ব্যানারের টাইটেল দিন',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return;
     }
     if (_selectedImage == null) {
       Get.snackbar(
-  'ত্রুটি',
-  'দয়া করে একটি ব্যানার ছবি নির্বাচন করুন',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ত্রুটি',
+        'দয়া করে একটি ব্যানার ছবি নির্বাচন করুন',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return;
     }
     if (_selectedBannerType == 'Target Role wise' && _selectedRoles.isEmpty) {
       Get.snackbar(
-  'ত্রুটি',
-  'দয়া করে অন্তত একটি টার্গেট রোল নির্বাচন করুন',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ত্রুটি',
+        'দয়া করে অন্তত একটি টার্গেট রোল নির্বাচন করুন',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return;
     }
 
@@ -94,6 +155,8 @@ class _AddBannerWidgetState extends State<AddBannerWidget> {
           ? _selectedRoles
           : [],
       imageFile: _selectedImage!,
+      startDate: _startDate,
+      expiryDate: _expiryDate,
     );
 
     if (success) {
@@ -102,6 +165,8 @@ class _AddBannerWidgetState extends State<AddBannerWidget> {
         _selectedBannerType = 'Default';
         _selectedRoles.clear();
         _selectedImage = null;
+        _startDate = null;
+        _expiryDate = null;
       });
     }
   }
@@ -250,136 +315,276 @@ class _AddBannerWidgetState extends State<AddBannerWidget> {
                           });
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primaryColor : Colors.grey.shade200,
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             roleName,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.grey.shade800,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey.shade800,
                             ),
                           ),
                         ),
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
                 ],
+                const SizedBox(height: 20),
 
-                // Banner Image
-                Row(
-                  children: [
-                    const Text(
-                      'ব্যানার ইমেজ ',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      '* ( Ratio 3:1 )',
-                      style: TextStyle(
-                        color: Colors.red.shade400,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    width: double.infinity,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: _selectedImage == null
-                        ? const Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 40,
-                              color: Colors.grey,
-                            ),
-                          )
-                        : kIsWeb
-                        ? Image.network(_selectedImage!.path, fit: BoxFit.cover)
-                        : Image.file(
-                            File(_selectedImage!.path),
-                            fit: BoxFit.cover,
+                // Date & Time Scheduling
+                const Text(
+                    'সময় নির্ধারণ (সরাসরি চালু করতে খালি রাখুন)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth > 500;
+                      final startBtn = InkWell(
+                        onTap: () => _selectDateTime(context, true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
                           ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Choose File',
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
-                          fontWeight: FontWeight.w500,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 18,
+                                color: AppColors.primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _startDate == null
+                                      ? 'শুরুর তারিখ ও সময়'
+                                      : DateFormat(
+                                          'dd MMM yyyy, hh:mm a',
+                                        ).format(_startDate!),
+                                  style: TextStyle(
+                                    color: _startDate == null
+                                        ? Colors.grey.shade600
+                                        : Colors.black87,
+                                    fontSize: 13,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (_startDate != null)
+                                GestureDetector(
+                                  onTap: () =>
+                                      setState(() => _startDate = null),
+                                  child: const Icon(
+                                    Icons.clear,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
+                      );
+
+                      final expiryBtn = InkWell(
+                        onTap: () => _selectDateTime(context, false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 18,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _expiryDate == null
+                                      ? 'শেষের তারিখ ও সময়'
+                                      : DateFormat(
+                                          'dd MMM yyyy, hh:mm a',
+                                        ).format(_expiryDate!),
+                                  style: TextStyle(
+                                    color: _expiryDate == null
+                                        ? Colors.grey.shade600
+                                        : Colors.black87,
+                                    fontSize: 13,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (_expiryDate != null)
+                                GestureDetector(
+                                  onTap: () =>
+                                      setState(() => _expiryDate = null),
+                                  child: const Icon(
+                                    Icons.clear,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+
+                      if (isWide) {
+                        return Row(
+                          children: [
+                            Expanded(child: startBtn),
+                            const SizedBox(width: 16),
+                            Expanded(child: expiryBtn),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            startBtn,
+                            const SizedBox(height: 12),
+                            expiryBtn,
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Banner Image
+                  Row(
+                    children: [
+                      const Text(
+                        'ব্যানার ইমেজ ',
+                        style: TextStyle(fontWeight: FontWeight.w500),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          _selectedImage?.name ?? 'No file chosen',
-                          style: TextStyle(color: Colors.grey.shade500),
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        '* ( Ratio 3:1 )',
+                        style: TextStyle(
+                          color: Colors.red.shade400,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: Obx(
-                    () => ElevatedButton(
-                      onPressed: _controller.isLoading.value ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: double.infinity,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: _controller.isLoading.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
+                      child: _selectedImage == null
+                          ? const Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 40,
+                                color: Colors.grey,
                               ),
                             )
-                          : const Text(
-                              'Save Banner',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          : kIsWeb
+                          ? Image.network(
+                              _selectedImage!.path,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.file(
+                              File(_selectedImage!.path),
+                              fit: BoxFit.cover,
                             ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Choose File',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            _selectedImage?.name ?? 'No file chosen',
+                            style: TextStyle(color: Colors.grey.shade500),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: _controller.isLoading.value ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: _controller.isLoading.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Save Banner',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
       ),
     );
   }

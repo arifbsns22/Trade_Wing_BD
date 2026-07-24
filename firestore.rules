@@ -3,18 +3,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Storefront & Catalog Data: Public read access for all app users (guest + logged in)
-    match /products/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /categories/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /brands/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /marketing_banners/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /product_types/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /units/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /packages/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /drive_packages/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /operators/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /settings/{doc} { allow read: if true; allow write: if request.auth != null; }
-    match /product_reviews/{doc} { allow read: if true; allow write: if request.auth != null; }
+    // Storefront & Catalog Data: Public read & write access (create, update, delete) for all app users
+    match /products/{doc} { allow read, write: if true; }
+    match /categories/{doc} { allow read, write: if true; }
+    match /brands/{doc} { allow read, write: if true; }
+    match /marketing_banners/{doc} { allow read, write: if true; }
+    match /product_types/{doc} { allow read, write: if true; }
+    match /units/{doc} { allow read, write: if true; }
+    match /packages/{doc} { allow read, write: if true; }
+    match /drive_packages/{doc} { allow read, write: if true; }
+    match /operators/{doc} { allow read, write: if true; }
+    match /settings/{doc} { allow read, write: if true; }
+    match /product_reviews/{doc} { allow read, write: if true; }
 
     // User-specific Data & Operations
     match /users/{doc} { allow read, write: if true; }
@@ -27,10 +27,9 @@ service cloud.firestore {
     match /trainings/{doc}/{allPaths=**} { allow read, write: if true; }
     match /{path=**}/attendance/{doc} { allow read, write: if true; }
 
-    // Permanent Global Fallback: Public read allowed, write restricted to authenticated sessions
+    // Permanent Global Fallback: Public read & write allowed
     match /{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }

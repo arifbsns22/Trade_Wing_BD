@@ -481,8 +481,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
               stream: FirebaseFirestore.instance
                   .collection('notifications')
                   .where('userMobile', isEqualTo: userMobile)
-                  .orderBy('createdAt', descending: true)
-                  .limit(15)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -510,14 +508,32 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   );
                 }
 
-                final docs = snapshot.data!.docs;
+                // Sort locally to prevent Firestore composite index requirement
+                final docs = List<QueryDocumentSnapshot>.from(snapshot.data!.docs);
+                docs.sort((a, b) {
+                  Timestamp? tsA;
+                  Timestamp? tsB;
+                  try {
+                    tsA = a.get('createdAt') as Timestamp?;
+                  } catch (_) {}
+                  try {
+                    tsB = b.get('createdAt') as Timestamp?;
+                  } catch (_) {}
+                  
+                  if (tsA == null && tsB == null) return 0;
+                  if (tsA == null) return 1;
+                  if (tsB == null) return -1;
+                  return tsB.compareTo(tsA);
+                });
+                final limitedDocs = docs.take(15).toList();
+
                 return ListView.separated(
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
-                  itemCount: docs.length,
+                  itemCount: limitedDocs.length,
                   separatorBuilder: (context, index) => const Divider(height: 1, thickness: 0.5),
                   itemBuilder: (context, index) {
-                    final doc = docs[index];
+                    final doc = limitedDocs[index];
                     final data = doc.data() as Map<String, dynamic>;
                     final String title = data['title'] ?? '';
                     final String body = data['body'] ?? '';

@@ -28,20 +28,21 @@ class _MobileRechargeScreenState extends State<MobileRechargeScreen> {
   void initState() {
     super.initState();
     
-    // Clear selected operator state initially
-    _rechargeController.selectedOperator.value = null;
+    // Clear selected operator state initially after the first build to avoid build-phase modifications
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _rechargeController.selectedOperator.value = null;
 
-    if (widget.prefilledOffer != null) {
-      final offer = widget.prefilledOffer!;
-      _amountController.text = offer.offerPrice.toString();
-      
-      // Auto-assign prefilled operator
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.prefilledOffer != null) {
+        final offer = widget.prefilledOffer!;
         final op = _userPackController.operators.firstWhereOrNull((o) => o.id == offer.operatorId);
         if (op != null) {
           _rechargeController.selectedOperator.value = op;
         }
-      });
+      }
+    });
+
+    if (widget.prefilledOffer != null) {
+      _amountController.text = widget.prefilledOffer!.offerPrice.toString();
     }
 
     // Auto-detect operator whenever phone number changes (typing, pasting, prefilling)

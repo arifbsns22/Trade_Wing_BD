@@ -5,7 +5,9 @@ class DashboardSummaryCard extends StatelessWidget {
   final String value;
   final String? subtitle;
   final IconData icon;
-  final List<Color> gradientColors;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color themeColor;
   final String? percentage;
   final bool isPositive;
 
@@ -15,7 +17,9 @@ class DashboardSummaryCard extends StatelessWidget {
     required this.value,
     this.subtitle,
     required this.icon,
-    required this.gradientColors,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.themeColor,
     this.percentage,
     this.isPositive = true,
   });
@@ -35,20 +39,19 @@ class DashboardSummaryCard extends StatelessWidget {
         );
       },
       child: Container(
-        width: 160,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: 1.2,
           ),
-          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: gradientColors.first.withValues(alpha: 0.25),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: themeColor.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -56,86 +59,99 @@ class DashboardSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Top Row: Title & Icon
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: themeColor.withValues(alpha: 0.9),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: themeColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     icon,
-                    color: Colors.white,
-                    size: 20,
+                    color: themeColor,
+                    size: 16,
                   ),
                 ),
-                if (percentage != null)
+              ],
+            ),
+            const SizedBox(height: 6),
+
+            // Middle: Large Value
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: themeColor,
+                letterSpacing: -0.5,
+                height: 1.1,
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // Bottom: Subtitle & trend badge
+            Row(
+              children: [
+                if (percentage != null) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,
-                      vertical: 2,
+                      vertical: 2.5,
                     ),
                     decoration: BoxDecoration(
-                      color: isPositive
-                          ? Colors.greenAccent.withValues(alpha: 0.3)
-                          : Colors.redAccent.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
+                      color: (isPositive ? Colors.green : Colors.red).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                          color: Colors.white,
-                          size: 10,
+                          isPositive ? Icons.trending_up : Icons.trending_down,
+                          color: isPositive ? Colors.green.shade700 : Colors.red.shade700,
+                          size: 11,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           percentage!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: Colors.white,
+                            color: isPositive ? Colors.green.shade700 : Colors.red.shade700,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.white.withValues(alpha: 0.6),
+                  const SizedBox(width: 6),
+                ],
+                if (subtitle != null)
+                  Expanded(
+                    child: Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: themeColor.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ],
               ],
             ),
           ],

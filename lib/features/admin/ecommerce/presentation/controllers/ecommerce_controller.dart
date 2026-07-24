@@ -25,6 +25,19 @@ class EcommerceController extends GetxController {
     fetchProducts();
   }
 
+  /// Re-fetch all data (called on pull-to-refresh)
+  Future<void> refresh() async {
+    isLoading.value = true;
+    fetchProductTypes();
+    fetchUnits();
+    fetchCategories();
+    fetchBrands();
+    fetchProducts();
+    // Allow streams to settle and emit their first event
+    await Future.delayed(const Duration(milliseconds: 800));
+    isLoading.value = false;
+  }
+
   // --- Product Types ---
   void fetchProductTypes() {
     _firestore.collection('product_types').orderBy('name').snapshots().listen(

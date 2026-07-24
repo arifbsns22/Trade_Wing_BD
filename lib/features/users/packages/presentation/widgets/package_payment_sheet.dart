@@ -10,6 +10,7 @@ import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_contro
 import 'package:trade_wign_bd/features/common/profile/presentation/controllers/admin_profile_controller.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void showPackagePaymentSheet(
@@ -155,6 +156,15 @@ class _PackagePaymentSheetState extends State<_PackagePaymentSheet> {
               .collection('orders')
               .doc(orderId)
               .set(orderModel.toMap());
+
+          // Send admin notification
+          await NotificationHelper.sendNotification(
+            title: 'নতুন প্যাকেজ অর্ডার! 📦',
+            body: '${authCtrl.currentUserName.value} (${authCtrl.currentUserMobile.value}) ৳${widget.package.price} মূল্যের "${widget.package.name}" প্যাকেজটি কেনার অর্ডার করেছেন।',
+            type: 'package_order',
+            userMobile: authCtrl.currentUserMobile.value,
+            isAdmin: true,
+          );
         } catch (e) {
           debugPrint('Error creating package order: $e');
         }

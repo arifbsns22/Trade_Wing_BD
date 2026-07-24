@@ -77,6 +77,156 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return '$dayName, ${toBengaliNumber(now.day)} $monthName ${toBengaliNumber(now.year)}';
   }
 
+  Widget _buildCompactStatusCard({
+    required String title,
+    required IconData icon,
+    required Color backgroundColor,
+    required Color borderColor,
+    required Color themeColor,
+    required int pending,
+    required int completed,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: borderColor,
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: themeColor.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 168,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Row: Title and Icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: themeColor.withValues(alpha: 0.9),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: themeColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: themeColor, size: 14),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // Middle: Large Count Value & Label
+              Text(
+                _controller.toBengaliNumber('${pending + completed} টি'),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: themeColor,
+                  letterSpacing: -0.5,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                'সর্বমোট অনুরোধ',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: themeColor.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Bottom: Status Indicators (Pending & Completed side-by-side)
+              Row(
+                children: [
+                  // Pending Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: themeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.hourglass_empty_rounded,
+                          color: themeColor,
+                          size: 11,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          'পেন্ডিং: ${_controller.toBengaliNumber('$pending')}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: themeColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  // Completed Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: themeColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: themeColor,
+                          size: 11,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          'সম্পন্ন: ${_controller.toBengaliNumber('$completed')}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: themeColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,169 +236,260 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: const CreateFloatingButton(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double width = constraints.maxWidth;
+            final bool isDesktop = width >= 900;
+            final bool isTablet = width >= 650 && width < 900;
+
+            final double horizontalPadding = isDesktop ? 28.0 : 20.0;
+            final double verticalPadding = isDesktop ? 30.0 : 24.0;
+
+            return RefreshIndicator(
+                color: const Color(0xFF08B3AC),
+                backgroundColor: Colors.white,
+                displacement: 50,
+                onRefresh: () => _controller.forceRefresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
+                  ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Welcome Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'স্বাগতম, সুপার এডমিন!',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getFormattedBengaliDate(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: const Color.fromARGB(255, 117, 117, 117),
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'স্বাগতম, সুপার এডমিন!',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getFormattedBengaliDate(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color.fromARGB(255, 117, 117, 117),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  const SizedBox(height: 24),
+
+                  // Summary Stats Grid (Responsive 2x2 or 4x1)
+                  Obx(() {
+                    final cardSales = DashboardSummaryCard(
+                      title: 'মোট বিক্রয় (এই মাস)',
+                      value: _controller.toBengaliNumber(
+                        _controller.formatCurrency(
+                          _controller.totalSalesThisMonth.value,
                         ),
-                      ],
+                      ),
+                      subtitle: 'গত মাসের তুলনায়',
+                      icon: Icons.monetization_on_outlined,
+                      backgroundColor: const Color(0xFFFFF3E0),
+                      borderColor: const Color(0xFFFFE0B2),
+                      themeColor: const Color(0xFFE65100),
+                      percentage: _controller.toBengaliNumber(
+                        _controller.formatPercentage(
+                          _controller.salesComparisonPercentage.value,
+                        ),
+                      ),
+                      isPositive: _controller.isSalesPositive.value,
+                    );
+
+                    final cardUsers = DashboardSummaryCard(
+                      title: 'নতুন গ্রাহক (এই মাস)',
+                      value: _controller.toBengaliNumber(
+                        '${_controller.usersThisMonth.value} জন',
+                      ),
+                      subtitle: 'গত মাসের তুলনায়',
+                      icon: Icons.people_outline,
+                      backgroundColor: const Color(0xFFE0F7FA),
+                      borderColor: const Color(0xFFB2EBF2),
+                      themeColor: const Color(0xFF00796B),
+                      percentage: _controller.toBengaliNumber(
+                        _controller.formatPercentage(
+                          _controller.usersComparisonPercentage.value,
+                        ),
+                      ),
+                      isPositive: _controller.isUsersPositive.value,
+                    );
+
+                    final cardPending = DashboardSummaryCard(
+                      title: 'পেন্ডিং রিকোয়েস্ট',
+                      value: _controller.toBengaliNumber(
+                        '${_controller.pendingOrdersCount.value} টি',
+                      ),
+                      subtitle: 'অপেক্ষমাণ অর্ডার',
+                      icon: Icons.pending_actions_outlined,
+                      backgroundColor: const Color(0xFFF3E5F5),
+                      borderColor: const Color(0xFFE1BEE7),
+                      themeColor: const Color(0xFF6A1B9A),
+                      percentage: null,
+                      isPositive: false,
+                    );
+
+                    final cardDelivered = DashboardSummaryCard(
+                      title: 'ডেলিভারি সম্পন্ন',
+                      value: _controller.toBengaliNumber(
+                        '${_controller.deliveredOrdersCount.value} টি',
+                      ),
+                      subtitle: 'সফল অর্ডার',
+                      icon: Icons.check_circle_outline,
+                      backgroundColor: const Color(0xFFE8F5E9),
+                      borderColor: const Color(0xFFC8E6C9),
+                      themeColor: const Color(0xFF2E7D32),
+                      percentage: null,
+                      isPositive: true,
+                    );
+
+                    return Skeletonizer(
+                      enabled: _controller.isLoading.value,
+                      child: isDesktop || isTablet
+                          ? Row(
+                              children: [
+                                Expanded(child: cardSales),
+                                const SizedBox(width: 16),
+                                Expanded(child: cardUsers),
+                                const SizedBox(width: 16),
+                                Expanded(child: cardPending),
+                                const SizedBox(width: 16),
+                                Expanded(child: cardDelivered),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(child: cardSales),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: cardUsers),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(child: cardPending),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: cardDelivered),
+                                  ],
+                                ),
+                              ],
+                            ),
+                    );
+                  }),
+                  const SizedBox(height: 28),
+
+                  // Compact Status section by Order/Payment Categories
+                  const Text(
+                    'অর্ডার ও পেমেন্ট স্ট্যাটাস',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
+                  const SizedBox(height: 14),
+                  Obx(() {
+                    final int cardColumns = isDesktop ? 4 : (isTablet ? 2 : 2);
+                    final double cardRatio = isDesktop
+                        ? 1.6
+                        : (isTablet ? 1.8 : 1.55);
+
+                    return Skeletonizer(
+                      enabled: _controller.isLoading.value,
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: cardColumns,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: cardRatio,
+                        children: [
+                          _buildCompactStatusCard(
+                            title: 'মোবাইল রিচার্জ',
+                            icon: Icons.phone_android_rounded,
+                            backgroundColor: const Color(0xFFE0F7FA),
+                            borderColor: const Color(0xFFB2EBF2),
+                            themeColor: const Color(0xFF00796B),
+                            pending: _controller.pendingRecharges.value,
+                            completed: _controller.completedRecharges.value,
+                          ),
+                          _buildCompactStatusCard(
+                            title: 'ড্রাইভ অফার',
+                            icon: Icons.flash_on_rounded,
+                            backgroundColor: const Color(0xFFFFF3E0),
+                            borderColor: const Color(0xFFFFE0B2),
+                            themeColor: const Color(0xFFE65100),
+                            pending: _controller.pendingDrives.value,
+                            completed: _controller.completedDrives.value,
+                          ),
+                          _buildCompactStatusCard(
+                            title: 'প্যাকেজ সাবস্ক্রিপশন',
+                            icon: Icons.card_membership_rounded,
+                            backgroundColor: const Color(0xFFF3E5F5),
+                            borderColor: const Color(0xFFE1BEE7),
+                            themeColor: const Color(0xFF6A1B9A),
+                            pending: _controller.pendingPackages.value,
+                            completed: _controller.completedPackages.value,
+                          ),
+                          _buildCompactStatusCard(
+                            title: 'ই-কমার্স প্রোডাক্ট',
+                            icon: Icons.shopping_bag_rounded,
+                            backgroundColor: const Color(0xFFE3F2FD),
+                            borderColor: const Color(0xFFBBDEFB),
+                            themeColor: const Color(0xFF0D47A1),
+                            pending: _controller.pendingProducts.value,
+                            completed: _controller.completedProducts.value,
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 28),
+
+                  // Line Chart & Bar Chart Section (responsive side-by-side or stacked)
+                  if (width >= 800)
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: DashboardLineChart()),
+                        SizedBox(width: 18),
+                        Expanded(child: DashboardBarChart()),
+                      ],
+                    )
+                  else
+                    const Column(
+                      children: [
+                        DashboardLineChart(),
+                        SizedBox(height: 24),
+                        DashboardBarChart(),
+                      ],
+                    ),
+                  const SizedBox(height: 28),
+
+                  // Recent Activities Section
+                  const RecentActivityList(),
+                  const SizedBox(height: 24),
                 ],
               ),
-              const SizedBox(height: 24),
-
-              // Summary Stats Grid (2x2)
-              Obx(() {
-                return Skeletonizer(
-                  enabled: _controller.isLoading.value,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DashboardSummaryCard(
-                              title: 'মোট বিক্রয় (এই মাস)',
-                              value: _controller.toBengaliNumber(
-                                _controller.formatCurrency(
-                                  _controller.totalSalesThisMonth.value,
-                                ),
-                              ),
-                              subtitle: 'গত মাসের তুলনায়',
-                              icon: Icons.monetization_on_outlined,
-                              gradientColors: [
-                                AppColors.primaryColor,
-                                const Color(0xff034F4b),
-                              ],
-                              percentage: _controller.toBengaliNumber(
-                                _controller.formatPercentage(
-                                  _controller.salesComparisonPercentage.value,
-                                ),
-                              ),
-                              isPositive: _controller.isSalesPositive.value,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: DashboardSummaryCard(
-                              title: 'নতুন গ্রাহক (এই মাস)',
-                              value: _controller.toBengaliNumber(
-                                '${_controller.usersThisMonth.value} জন',
-                              ),
-                              subtitle: 'গত মাসের তুলনায়',
-                              icon: Icons.people_outline,
-                              gradientColors: [
-                                const Color(0xffAA7BFF),
-                                const Color(0xff664A99),
-                              ],
-                              percentage: _controller.toBengaliNumber(
-                                _controller.formatPercentage(
-                                  _controller.usersComparisonPercentage.value,
-                                ),
-                              ),
-                              isPositive: _controller.isUsersPositive.value,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DashboardSummaryCard(
-                              title: 'পেন্ডিং রিকোয়েস্ট',
-                              value: _controller.toBengaliNumber(
-                                '${_controller.pendingOrdersCount.value} টি',
-                              ),
-                              subtitle: 'অপেক্ষমাণ অর্ডার',
-                              icon: Icons.pending_actions_outlined,
-                              gradientColors: [
-                                const Color(0xfff6ca44),
-                                const Color(0xff8F4D05),
-                              ],
-                              percentage: null,
-                              isPositive: false,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: DashboardSummaryCard(
-                              title: 'ডেলিভারি সম্পন্ন',
-                              value: _controller.toBengaliNumber(
-                                '${_controller.deliveredOrdersCount.value} টি',
-                              ),
-                              subtitle: 'সফল অর্ডার',
-                              icon: Icons.check_circle_outline,
-                              gradientColors: [
-                                Colors.blueGrey.shade600,
-                                Colors.blueGrey.shade800,
-                              ],
-                              percentage: null,
-                              isPositive: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              const SizedBox(height: 24),
-
-              // Line Chart Section
-              const DashboardLineChart(),
-              const SizedBox(height: 24),
-
-              // Goals / Circular Ring Indicators Grid
-              const SizedBox(height: 24),
-
-              // Bar Chart Section
-              const DashboardBarChart(),
-              const SizedBox(height: 24),
-
-              // Recent Activities Section
-              const RecentActivityList(),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ), // SingleChildScrollView
+            ); // RefreshIndicator
+          },
         ),
       ),
     );

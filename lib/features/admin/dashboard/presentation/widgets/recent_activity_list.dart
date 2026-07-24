@@ -4,7 +4,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 import 'package:trade_wign_bd/features/admin/dashboard/presentation/controllers/admin_dashboard_controller.dart';
 import 'package:trade_wign_bd/features/admin/ecommerce/presentation/screens/admin_orders_screen.dart';
-import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_model.dart';
 
 class RecentActivityItem {
   final String title;
@@ -72,7 +71,7 @@ class RecentActivityList extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'সর্বশেষ ৫টি রিয়েল-টাইম অর্ডার আপডেট',
+                    'সর্বশেষ ১০টি রিয়েল-টাইম অর্ডার আপডেট',
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                 ],
@@ -112,7 +111,7 @@ class RecentActivityList extends StatelessWidget {
 
             if (isLoading) {
               displayActivities = List.generate(
-                5,
+                10,
                 (index) => RecentActivityItem(
                   title: 'লোড হচ্ছে...',
                   orderStatus: 'লোড হচ্ছে...',
@@ -125,7 +124,7 @@ class RecentActivityList extends StatelessWidget {
                   iconColor: Colors.grey,
                 ),
               );
-            } else if (controller.recentOrders.isEmpty) {
+            } else if (controller.recentActivities.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 30),
                 child: Center(
@@ -136,8 +135,8 @@ class RecentActivityList extends StatelessWidget {
                 ),
               );
             } else {
-              displayActivities = controller.recentOrders.map((order) {
-                return _mapOrderToActivity(order, controller);
+              displayActivities = controller.recentActivities.map((activity) {
+                return _mapActivityToItem(activity, controller);
               }).toList();
             }
 
@@ -200,7 +199,8 @@ class RecentActivityList extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  TextSpan(text: ' • ${activity.time}'),
+                                  const TextSpan(text: ' • '),
+                                  TextSpan(text: activity.time),
                                 ],
                               ),
                               style: TextStyle(
@@ -216,7 +216,7 @@ class RecentActivityList extends StatelessWidget {
                         activity.amount,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16,
                           color: activity.isNegative
                               ? Colors.redAccent
                               : AppColors.green,
@@ -233,66 +233,75 @@ class RecentActivityList extends StatelessWidget {
     );
   }
 
-  RecentActivityItem _mapOrderToActivity(
-    OrderModel order,
+  RecentActivityItem _mapActivityToItem(
+    DashboardActivityModel activity,
     AdminDashboardController controller,
   ) {
     IconData icon;
     Color color;
 
+    switch (activity.type) {
+      case DashboardActivityType.product:
+        icon = Icons.shopping_bag_outlined;
+        color = Colors.blue;
+        break;
+      case DashboardActivityType.package:
+        icon = Icons.card_membership_outlined;
+        color = const Color(0xffAA7BFF);
+        break;
+      case DashboardActivityType.drive:
+        icon = Icons.bolt_outlined;
+        color = Colors.orange;
+        break;
+      case DashboardActivityType.recharge:
+        icon = Icons.phone_android_outlined;
+        color = Colors.teal;
+        break;
+    }
+
     String orderStatusStr = '';
     Color orderStatusColor = Colors.grey;
-    switch (order.orderStatus) {
-      case OrderStatus.pending:
-        icon = Icons.pending_actions_outlined;
-        color = const Color(0xfff6ca44);
-        orderStatusStr = 'পেন্ডিং';
-        orderStatusColor = Colors.orange;
-        break;
-      case OrderStatus.processing:
-        icon = Icons.autorenew_outlined;
-        color = Colors.blue;
-        orderStatusStr = 'প্রসেসিং';
-        orderStatusColor = Colors.blue;
-        break;
-      case OrderStatus.shipped:
-        icon = Icons.local_shipping_outlined;
-        color = const Color(0xffAA7BFF);
-        orderStatusStr = 'শিপড';
-        orderStatusColor = const Color(0xffAA7BFF);
-        break;
-      case OrderStatus.delivered:
-        icon = Icons.check_circle_outline;
-        color = Colors.green;
-        orderStatusStr = 'ডেলিভার্ড';
-        orderStatusColor = AppColors.green;
-        break;
-      case OrderStatus.cancelled:
-        icon = Icons.cancel_outlined;
-        color = Colors.redAccent;
-        orderStatusStr = 'বাতিল';
-        orderStatusColor = Colors.redAccent;
-        break;
+    final status = activity.status.toLowerCase();
+
+    if (status == 'pending') {
+      orderStatusStr = 'পেন্ডিং';
+      orderStatusColor = Colors.orange;
+    } else if (status == 'processing') {
+      orderStatusStr = 'প্রসেসিং';
+      orderStatusColor = Colors.blue;
+    } else if (status == 'shipped') {
+      orderStatusStr = 'শিপড';
+      orderStatusColor = const Color(0xffAA7BFF);
+    } else if (status == 'delivered' || status == 'completed') {
+      orderStatusStr = 'ডেলিভার্ড';
+      orderStatusColor = AppColors.green;
+    } else if (status == 'cancelled' || status == 'failed') {
+      orderStatusStr = 'বাতিল';
+      orderStatusColor = Colors.redAccent;
+    } else {
+      orderStatusStr = activity.status;
+      orderStatusColor = Colors.grey;
     }
 
     String paymentStatusStr = '';
     Color paymentStatusColor = Colors.grey;
-    switch (order.paymentStatus) {
-      case PaymentStatus.pending:
-        paymentStatusStr = 'পেন্ডিং';
-        paymentStatusColor = Colors.orange;
-        break;
-      case PaymentStatus.verified:
-        paymentStatusStr = 'ভেরিফাইড';
-        paymentStatusColor = AppColors.green;
-        break;
-      case PaymentStatus.failed:
-        paymentStatusStr = 'ফেইল্ড';
-        paymentStatusColor = Colors.redAccent;
-        break;
+    final payStatus = activity.paymentStatus.toLowerCase();
+
+    if (payStatus == 'pending') {
+      paymentStatusStr = 'পেন্ডিং';
+      paymentStatusColor = Colors.orange;
+    } else if (payStatus == 'verified' || payStatus == 'completed') {
+      paymentStatusStr = 'ভেরিফাইড';
+      paymentStatusColor = AppColors.green;
+    } else if (payStatus == 'failed') {
+      paymentStatusStr = 'ফেইল্ড';
+      paymentStatusColor = Colors.redAccent;
+    } else {
+      paymentStatusStr = activity.paymentStatus;
+      paymentStatusColor = Colors.grey;
     }
 
-    final difference = DateTime.now().difference(order.createdAt);
+    final difference = DateTime.now().difference(activity.createdAt);
     String timeAgo = '';
     if (difference.inDays > 0) {
       timeAgo =
@@ -307,21 +316,25 @@ class RecentActivityList extends StatelessWidget {
       timeAgo = 'এইমাত্র';
     }
 
-    String orderIdText = order.orderId;
+    // Title mapping
+    String titleText = activity.title;
+    if (activity.type == DashboardActivityType.product || activity.type == DashboardActivityType.package) {
+      titleText = '${activity.title} #${controller.toBengaliNumber(activity.id)}';
+    }
 
     return RecentActivityItem(
-      title: 'অর্ডার #${controller.toBengaliNumber(orderIdText)}',
+      title: titleText,
       orderStatus: orderStatusStr,
       orderStatusColor: orderStatusColor,
       paymentStatus: paymentStatusStr,
       paymentStatusColor: paymentStatusColor,
       amount: controller.toBengaliNumber(
-        controller.formatCurrency(order.totalAmount),
+        controller.formatCurrency(activity.amount),
       ),
       time: timeAgo,
       icon: icon,
       iconColor: color,
-      isNegative: order.orderStatus == OrderStatus.cancelled,
+      isNegative: status == 'cancelled' || status == 'failed',
     );
   }
 }

@@ -29,17 +29,17 @@ class BannerController extends GetxController {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen(
-      (snapshot) {
-        banners.value = snapshot.docs
-            .map((doc) => BannerModel.fromFirestore(doc))
-            .toList();
-        isLoading.value = false;
-      },
-      onError: (e) {
-        debugPrint('Error fetching banners: $e');
-        isLoading.value = false;
-      },
-    );
+          (snapshot) {
+            banners.value = snapshot.docs
+                .map((doc) => BannerModel.fromFirestore(doc))
+                .toList();
+            isLoading.value = false;
+          },
+          onError: (e) {
+            debugPrint('Error fetching banners: $e');
+            isLoading.value = false;
+          },
+        );
   }
 
   List<BannerModel> get filteredBanners {
@@ -47,7 +47,10 @@ class BannerController extends GetxController {
       return banners;
     }
     return banners
-        .where((b) => b.title.toLowerCase().contains(searchQuery.value.toLowerCase()))
+        .where(
+          (b) =>
+              b.title.toLowerCase().contains(searchQuery.value.toLowerCase()),
+        )
         .toList();
   }
 
@@ -56,6 +59,8 @@ class BannerController extends GetxController {
     required String bannerType,
     required List<String> targetRoles,
     required XFile imageFile,
+    DateTime? startDate,
+    DateTime? expiryDate,
   }) async {
     try {
       isLoading.value = true;
@@ -63,7 +68,8 @@ class BannerController extends GetxController {
       // Upload Image
       final bytes = await imageFile.readAsBytes();
       final extension = imageFile.name.split('.').last;
-      final fileName = 'banner_${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final fileName =
+          'banner_${DateTime.now().millisecondsSinceEpoch}.$extension';
       final String destination = 'banners/$fileName';
 
       final String? imageUrl = await _r2Service.uploadBytes(
@@ -84,34 +90,36 @@ class BannerController extends GetxController {
         imageUrl: imageUrl,
         isFeatured: false,
         status: true,
+        startDate: startDate,
+        expiryDate: expiryDate,
         createdAt: Timestamp.now(),
       );
 
       await _firestore.collection(collectionPath).add(newBanner.toFirestore());
 
       Get.snackbar(
-  'সফল',
-  'ব্যানার সফলভাবে যুক্ত করা হয়েছে',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'সফল',
+        'ব্যানার সফলভাবে যুক্ত করা হয়েছে',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return true;
     } catch (e) {
       debugPrint('Error adding banner: $e');
       Get.snackbar(
-  'ত্রুটি',
-  'ব্যানার যুক্ত করা যায়নি: $e',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ত্রুটি',
+        'ব্যানার যুক্ত করা যায়নি: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -138,31 +146,48 @@ class BannerController extends GetxController {
     }
   }
 
-  Future<void> deleteBanner(String id) async {
+  Future<void> deleteBanner(String id, String imageUrl) async {
     try {
+      // 1. Delete the Firestore document
       await _firestore.collection(collectionPath).doc(id).delete();
+
+      // 2. Delete the image from Cloudflare R2
+      // Extract the object path from the full public URL
+      // e.g. https://pub-xxx.r2.dev/banners/banner_123.jpg -> banners/banner_123.jpg
+      try {
+        final uri = Uri.tryParse(imageUrl);
+        if (uri != null && uri.pathSegments.isNotEmpty) {
+          final objectPath = uri.pathSegments.join('/');
+          await _r2Service.deleteFile(objectPath);
+          debugPrint('R2 image deleted: $objectPath');
+        }
+      } catch (r2Error) {
+        // Log R2 error but don't block success if Firestore doc was deleted
+        debugPrint('Warning: R2 image could not be deleted: $r2Error');
+      }
+
       Get.snackbar(
-  'সফল',
-  'ব্যানার মুছে ফেলা হয়েছে',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'সফল',
+        'ব্যানার মুছে ফেলা হয়েছে',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
     } catch (e) {
       debugPrint('Error deleting banner: $e');
       Get.snackbar(
-  'ত্রুটি',
-  'ব্যানার মোছা যায়নি: $e',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ত্রুটি',
+        'ব্যানার মোছা যায়নি: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
     }
   }
 }

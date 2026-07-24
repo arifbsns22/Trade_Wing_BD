@@ -20,8 +20,8 @@ class HomeSlider extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 160,
+          return const AspectRatio(
+            aspectRatio: 3 / 0.85,
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -44,6 +44,14 @@ class HomeSlider extends StatelessWidget {
           final banners = snapshot.data!.docs
               .map((doc) => BannerModel.fromFirestore(doc))
               .where((banner) {
+                final now = DateTime.now();
+                if (banner.startDate != null && banner.startDate!.isAfter(now)) {
+                  return false;
+                }
+                if (banner.expiryDate != null && banner.expiryDate!.isBefore(now)) {
+                  return false;
+                }
+
                 if (banner.targetRoles.isEmpty) return true;
                 final roleLower = userRole.toLowerCase().trim();
                 return banner.targetRoles.any((r) {
@@ -83,7 +91,7 @@ class HomeSlider extends StatelessWidget {
                   );
                 },
             options: CarouselOptions(
-              aspectRatio: 3 / 1,
+              aspectRatio: 3 / 0.85,
               autoPlay: banners.length > 1,
               enlargeFactor: 0.2,
               enlargeCenterPage: true,

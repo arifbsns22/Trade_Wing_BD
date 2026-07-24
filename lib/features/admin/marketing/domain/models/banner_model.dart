@@ -8,6 +8,8 @@ class BannerModel {
   final String imageUrl;
   final bool isFeatured;
   final bool status;
+  final DateTime? startDate;
+  final DateTime? expiryDate;
   final Timestamp? createdAt;
 
   BannerModel({
@@ -18,6 +20,8 @@ class BannerModel {
     required this.imageUrl,
     this.isFeatured = false,
     this.status = true,
+    this.startDate,
+    this.expiryDate,
     this.createdAt,
   });
 
@@ -31,6 +35,12 @@ class BannerModel {
       imageUrl: data['imageUrl'] ?? '',
       isFeatured: data['isFeatured'] ?? false,
       status: data['status'] ?? true,
+      startDate: data['startDate'] != null
+          ? (data['startDate'] as Timestamp).toDate()
+          : null,
+      expiryDate: data['expiryDate'] != null
+          ? (data['expiryDate'] as Timestamp).toDate()
+          : null,
       createdAt: data['createdAt'] as Timestamp?,
     );
   }
@@ -43,6 +53,8 @@ class BannerModel {
       'imageUrl': imageUrl,
       'isFeatured': isFeatured,
       'status': status,
+      if (startDate != null) 'startDate': Timestamp.fromDate(startDate!),
+      if (expiryDate != null) 'expiryDate': Timestamp.fromDate(expiryDate!),
       if (createdAt != null) 'createdAt': createdAt,
     };
   }

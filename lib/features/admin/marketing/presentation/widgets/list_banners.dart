@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 import '../controllers/banner_controller.dart';
 
@@ -168,15 +169,46 @@ class ListBannersWidget extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                SizedBox(
-                                  width: 160,
-                                  child: Text(
-                                    banner.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                 SizedBox(
+                                  width: 180,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        banner.title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (banner.startDate != null || banner.expiryDate != null) ...[
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              size: 12,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                _getScheduleText(banner),
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: _getScheduleColor(banner),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               ],
@@ -278,6 +310,7 @@ class ListBannersWidget extends StatelessWidget {
                                     onPressed: () => _showDeleteConfirmDialog(
                                       context,
                                       banner.id,
+                                      banner.imageUrl,
                                       controller,
                                     ),
                                   ),
@@ -301,6 +334,7 @@ class ListBannersWidget extends StatelessWidget {
   void _showDeleteConfirmDialog(
     BuildContext context,
     String id,
+    String imageUrl,
     BannerController controller,
   ) {
     showDialog(
@@ -317,12 +351,42 @@ class ListBannersWidget extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () {
               Navigator.pop(context);
-              controller.deleteBanner(id);
+              controller.deleteBanner(id, imageUrl);
             },
             child: const Text('হ্যাঁ', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
+  }
+
+  String _getScheduleText(dynamic banner) {
+    final now = DateTime.now();
+    final fmt = DateFormat('dd MMM, hh:mm a');
+    
+    if (banner.startDate != null && banner.startDate!.isAfter(now)) {
+      return 'Scheduled: Starts ${fmt.format(banner.startDate!)}';
+    }
+    if (banner.expiryDate != null && banner.expiryDate!.isBefore(now)) {
+      return 'Expired: ${fmt.format(banner.expiryDate!)}';
+    }
+    if (banner.expiryDate != null) {
+      return 'Expires: ${fmt.format(banner.expiryDate!)}';
+    }
+    if (banner.startDate != null) {
+      return 'Active since: ${fmt.format(banner.startDate!)}';
+    }
+    return '';
+  }
+
+  Color _getScheduleColor(dynamic banner) {
+    final now = DateTime.now();
+    if (banner.startDate != null && banner.startDate!.isAfter(now)) {
+      return Colors.orange.shade700;
+    }
+    if (banner.expiryDate != null && banner.expiryDate!.isBefore(now)) {
+      return Colors.red.shade700;
+    }
+    return Colors.green.shade700;
   }
 }

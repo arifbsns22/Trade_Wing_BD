@@ -30,21 +30,28 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         child: Obx(
           () => Skeletonizer(
             enabled: ecommerceController.isLoading.value,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20.0, 00.0, 20.0, 118.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FeatureGrid(features: featureList),
-                  const SizedBox(height: 20),
-                  const HomeSlider(),
-                  const SizedBox(height: 20),
-                  const CategorySection(),
-                  const SizedBox(height: 20),
-                  const BrandSection(),
-                  const SizedBox(height: 20),
-                  const HomeProductSections(),
-                ],
+            child: RefreshIndicator(
+              color: const Color(0xFF08B3AC),
+              backgroundColor: Colors.white,
+              displacement: 50,
+              onRefresh: () => ecommerceController.refresh(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20.0, 00.0, 20.0, 118.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FeatureGrid(features: featureList),
+                    const SizedBox(height: 20),
+                    const HomeSlider(),
+                    const SizedBox(height: 20),
+                    const CategorySection(),
+                    const SizedBox(height: 20),
+                    const BrandSection(),
+                    const SizedBox(height: 20),
+                    const HomeProductSections(),
+                  ],
+                ),
               ),
             ),
           ),

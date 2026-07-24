@@ -23,7 +23,7 @@ class CustomFloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       heroTag: heroTag,
-      backgroundColor: backgroundColor ?? AppColors.primaryColor,
+      backgroundColor: backgroundColor ?? AppColors.green,
       foregroundColor: foregroundColor,
       shape: const CircleBorder(),
       elevation: elevation,

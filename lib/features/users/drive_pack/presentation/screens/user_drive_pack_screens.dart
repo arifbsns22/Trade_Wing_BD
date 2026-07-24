@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.dart';
 import '../controllers/user_drive_pack_controller.dart';
 import '../widgets/operator_offers_display_list.dart';
 import '../widgets/mobile_recharge.dart';
@@ -97,6 +98,81 @@ class _UserDrivePackScreenState extends State<UserDrivePackScreen> {
 
       ),
       body: Obx(() {
+        final isGuest = _authController.currentUserMobile.value.isEmpty ||
+            _authController.currentUserRole.value.toLowerCase() == 'guest customer';
+
+        if (isGuest) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.phone_iphone_outlined,
+                      size: 80,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'ড্রাইভ প্যাকেজে আপনাকে স্বাগতম!',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'ড্রাইভ অফার দেখতে এবং রিচার্জ করতে অনুগ্রহ করে লগইন করুন।',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      onPressed: () {
+                        Get.to(() => const LoginScreen(returnBack: true))?.then((value) {
+                          // Rebuild after returning to see if logged in
+                          setState(() {});
+                        });
+                      },
+                      child: const Text(
+                        'লগইন করুন',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (_controller.isLoading.value && _controller.operators.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(color: Color(0xFF08B3AC)),

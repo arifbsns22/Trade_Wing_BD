@@ -13,6 +13,10 @@ class RechargeModel {
   final String transactionId;
   final String rechargeType; // 'regular' or 'drive'
   final String? drivePackageId; // Null for regular recharge
+  final String paymentMethod; // 'offline' or 'wallet'
+  final String? offlineGateway;
+  final String? offlineSenderMobile;
+  final String? offlineTrxId;
 
   RechargeModel({
     required this.id,
@@ -27,6 +31,10 @@ class RechargeModel {
     required this.transactionId,
     required this.rechargeType,
     this.drivePackageId,
+    this.paymentMethod = 'offline',
+    this.offlineGateway,
+    this.offlineSenderMobile,
+    this.offlineTrxId,
   });
 
   /// Maps model properties to a Firestore-compatible map.
@@ -43,6 +51,10 @@ class RechargeModel {
       'transactionId': transactionId,
       'rechargeType': rechargeType,
       'drivePackageId': drivePackageId,
+      'paymentMethod': paymentMethod,
+      'offlineGateway': offlineGateway,
+      'offlineSenderMobile': offlineSenderMobile,
+      'offlineTrxId': offlineTrxId,
     };
   }
 
@@ -61,6 +73,10 @@ class RechargeModel {
       'transactionId': transactionId,
       'rechargeType': rechargeType,
       'drivePackageId': drivePackageId,
+      'paymentMethod': paymentMethod,
+      'offlineGateway': offlineGateway,
+      'offlineSenderMobile': offlineSenderMobile,
+      'offlineTrxId': offlineTrxId,
     };
   }
 
@@ -80,6 +96,10 @@ class RechargeModel {
       transactionId: data['transactionId'] ?? '',
       rechargeType: data['rechargeType'] ?? 'regular',
       drivePackageId: data['drivePackageId'],
+      paymentMethod: data['paymentMethod'] ?? 'offline',
+      offlineGateway: data['offlineGateway'],
+      offlineSenderMobile: data['offlineSenderMobile'],
+      offlineTrxId: data['offlineTrxId'],
     );
   }
 
@@ -100,6 +120,10 @@ class RechargeModel {
       transactionId: json['transactionId'] ?? '',
       rechargeType: json['rechargeType'] ?? 'regular',
       drivePackageId: json['drivePackageId'],
+      paymentMethod: json['paymentMethod'] ?? 'offline',
+      offlineGateway: json['offlineGateway'],
+      offlineSenderMobile: json['offlineSenderMobile'],
+      offlineTrxId: json['offlineTrxId'],
     );
   }
 
@@ -116,6 +140,10 @@ class RechargeModel {
     String? transactionId,
     String? rechargeType,
     String? drivePackageId,
+    String? paymentMethod,
+    String? offlineGateway,
+    String? offlineSenderMobile,
+    String? offlineTrxId,
   }) {
     return RechargeModel(
       id: id ?? this.id,
@@ -130,6 +158,10 @@ class RechargeModel {
       transactionId: transactionId ?? this.transactionId,
       rechargeType: rechargeType ?? this.rechargeType,
       drivePackageId: drivePackageId ?? this.drivePackageId,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      offlineGateway: offlineGateway ?? this.offlineGateway,
+      offlineSenderMobile: offlineSenderMobile ?? this.offlineSenderMobile,
+      offlineTrxId: offlineTrxId ?? this.offlineTrxId,
     );
   }
 }

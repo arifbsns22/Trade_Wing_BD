@@ -16,12 +16,24 @@ class DashboardLineChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFF5F3FF), // Extremely soft lavender
+            const Color(0xFFECFDF5), // Extremely soft mint/teal
+            const Color(0xFFEFF6FF), // Extremely soft blue
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.primaryColor.withValues(alpha: 0.12),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 15,
             offset: const Offset(0, 8),
           ),
         ],
@@ -37,7 +49,7 @@ class DashboardLineChart extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'দৈনিক লেনদেন চিত্র',
+                      'দৈনিক বিক্রয় চিত্র',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -47,17 +59,13 @@ class DashboardLineChart extends StatelessWidget {
                     const SizedBox(height: 4),
                     Builder(
                       builder: (context) {
-                        final monthName = _getBengaliMonthName(
-                          DateTime.now().month,
-                        );
-                        final year = controller.toBengaliNumber(
-                          DateTime.now().year.toString(),
-                        );
+                        final monthName = _getBengaliMonthName(DateTime.now().month);
+                        final year = controller.toBengaliNumber(DateTime.now().year.toString());
                         return Text(
-                          'লেনদেন ও ব্যয়ের বিবরণী • $monthName $year',
+                          '$monthName $year • চলতি মাসের আয়',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade500,
+                            color: Colors.black54,
                           ),
                         );
                       },
@@ -67,31 +75,29 @@ class DashboardLineChart extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  color: const Color(0xFFE0F2F1),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFB2DFDB)),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF00897B),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      'লাইভ ট্র্যাকিং',
+                    const Text(
+                      'লাইভ',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+                        color: Color(0xFF00796B),
                       ),
                     ),
                   ],
@@ -105,10 +111,8 @@ class DashboardLineChart extends StatelessWidget {
             child: Obx(() {
               final isLoading = controller.isLoading.value;
 
-              // Generate spots
               List<FlSpot> spots = [];
               if (isLoading || controller.dailySales.isEmpty) {
-                // Dummy spots for Skeletonizer
                 for (int i = 0; i < 7; i++) {
                   spots.add(FlSpot(i.toDouble(), (i + 1) * 10000.0));
                 }
@@ -116,17 +120,12 @@ class DashboardLineChart extends StatelessWidget {
                 for (int i = 0; i < controller.dailySales.length; i++) {
                   spots.add(FlSpot(i.toDouble(), controller.dailySales[i]));
                 }
-                // Only show until current day of month
                 final currentDay = DateTime.now().day;
                 spots = spots.sublist(0, currentDay);
               }
 
-              // FlChart needs at least 2 spots to draw a line properly,
-              // or minX < maxX. If it's the 1st of the month, maxX is 0,
-              // which causes division by zero and layout overflow.
               double calculatedMaxX = spots.length.toDouble() - 1;
-              if (calculatedMaxX < 1)
-                calculatedMaxX = 1; // Prevent minX == maxX
+              if (calculatedMaxX < 1) calculatedMaxX = 1;
 
               return Skeletonizer(
                 enabled: isLoading,
@@ -143,22 +142,19 @@ class DashboardLineChart extends StatelessWidget {
                     LineChartData(
                       gridData: FlGridData(
                         show: true,
-                        drawHorizontalLine: false,
-                        drawVerticalLine: true,
-                        getDrawingVerticalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey.shade100,
-                            strokeWidth: 1.5,
-                            dashArray: [5, 5],
-                          );
-                        },
+                        drawHorizontalLine: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          strokeWidth: 1,
+                        ),
                       ),
                       titlesData: FlTitlesData(
                         show: true,
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
-                            reservedSize: 30,
+                            reservedSize: 28,
                             interval: 5,
                             getTitlesWidget: (value, meta) =>
                                 _bottomTitleWidgets(value, meta, controller),
@@ -172,15 +168,11 @@ class DashboardLineChart extends StatelessWidget {
                                 : 1000,
                             getTitlesWidget: (value, meta) =>
                                 _leftTitleWidgets(value, meta, controller),
-                            reservedSize: 42,
+                            reservedSize: 48,
                           ),
                         ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
                       borderData: FlBorderData(show: false),
                       minX: 0,
@@ -189,14 +181,13 @@ class DashboardLineChart extends StatelessWidget {
                       maxY: controller.chartMaxY.value,
                       lineTouchData: LineTouchData(
                         touchTooltipData: LineTouchTooltipData(
-                          getTooltipColor: (touchedSpot) =>
-                              AppColors.primaryColor,
-                          tooltipBorderRadius: BorderRadius.circular(8),
+                          getTooltipColor: (touchedSpot) => AppColors.primaryColor.withValues(alpha: 0.95),
+                          tooltipBorderRadius: BorderRadius.circular(10),
+                          tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                             return touchedBarSpots.map((barSpot) {
-                              final val = barSpot.y;
                               return LineTooltipItem(
-                                controller.formatCurrency(val),
+                                controller.toBengaliNumber(controller.formatCurrency(barSpot.y)),
                                 const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -211,23 +202,30 @@ class DashboardLineChart extends StatelessWidget {
                         LineChartBarData(
                           spots: spots,
                           isCurved: true,
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xffAA7BFF),
-                              AppColors.primaryColor,
-                              const Color(0xff034F4b),
-                            ],
+                          curveSmoothness: 0.35,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFAB47BC), Color(0xFF00ACC1)],
                           ),
-                          barWidth: 4,
+                          barWidth: 3.5,
                           isStrokeCapRound: true,
-                          dotData: const FlDotData(show: true),
+                          dotData: FlDotData(
+                            show: true,
+                            getDotPainter: (spot, percent, bar, index) {
+                              return FlDotCirclePainter(
+                                radius: 3.5,
+                                color: Colors.white,
+                                strokeWidth: 2,
+                                strokeColor: const Color(0xFF00ACC1),
+                              );
+                            },
+                          ),
                           belowBarData: BarAreaData(
                             show: true,
                             gradient: LinearGradient(
                               colors: [
-                                const Color(0xffAA7BFF).withValues(alpha: 0.15),
-                                AppColors.primaryColor.withValues(alpha: 0.15),
-                                AppColors.primaryColor.withValues(alpha: 0.0),
+                                const Color(0xFFAB47BC).withValues(alpha: 0.18),
+                                const Color(0xFF00ACC1).withValues(alpha: 0.08),
+                                const Color(0xFF00ACC1).withValues(alpha: 0.0),
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -246,69 +244,43 @@ class DashboardLineChart extends StatelessWidget {
     );
   }
 
-  Widget _bottomTitleWidgets(
-    double value,
-    TitleMeta meta,
-    AdminDashboardController controller,
-  ) {
-    const style = TextStyle(
+  Widget _bottomTitleWidgets(double value, TitleMeta meta, AdminDashboardController controller) {
+    final style = TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 10,
-      color: Colors.grey,
+      fontSize: 9,
+      color: Colors.grey.shade600,
     );
-
-    // value is index (0 to 30), so day is value + 1
     int day = value.toInt() + 1;
-    String text =
-        "${controller.toBengaliNumber(day.toString())} ${_getBengaliMonthName(DateTime.now().month)}";
-
     return SideTitleWidget(
       meta: meta,
-      space: 10,
-      child: Text(text, style: style),
+      space: 8,
+      child: Text(controller.toBengaliNumber(day.toString()), style: style),
     );
   }
 
-  Widget _leftTitleWidgets(
-    double value,
-    TitleMeta meta,
-    AdminDashboardController controller,
-  ) {
-    const style = TextStyle(
+  Widget _leftTitleWidgets(double value, TitleMeta meta, AdminDashboardController controller) {
+    final style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 9,
-      color: Colors.grey,
+      color: Colors.grey.shade600,
     );
-
-    // We format the Y axis values
     String text;
     if (value == 0) {
       text = '০';
+    } else if (value >= 1000) {
+      text = '${controller.toBengaliNumber((value / 1000).toStringAsFixed(0))}k';
     } else {
-      text = controller.toBengaliNumber(controller.formatCurrency(value));
+      text = controller.toBengaliNumber(value.toInt().toString());
     }
-
     return Text(text, style: style, textAlign: TextAlign.right);
   }
 
   String _getBengaliMonthName(int month) {
     const bnMonths = [
-      'জানুয়ারি',
-      'ফেব্রুয়ারি',
-      'মার্চ',
-      'এপ্রিল',
-      'মে',
-      'জুন',
-      'জুলাই',
-      'আগস্ট',
-      'সেপ্টেম্বর',
-      'অক্টোবর',
-      'নভেম্বর',
-      'ডিসেম্বর',
+      'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+      'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
     ];
-    if (month >= 1 && month <= 12) {
-      return bnMonths[month - 1];
-    }
+    if (month >= 1 && month <= 12) return bnMonths[month - 1];
     return '';
   }
 }

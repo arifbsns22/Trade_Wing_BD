@@ -2,13 +2,16 @@ import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:trade_wign_bd/common/ui/widgets/customAlertDialogue.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:trade_wign_bd/features/admin/settings/presentation/controllers/admin_settings_controller.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/data/repositories/drive_pack_repository.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/domain/models/operator_model.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/domain/models/drive_package_model.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/domain/models/recharge_model.dart';
+import 'package:trade_wign_bd/common/services/notification_helper.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 class MobileRechargeController extends GetxController {
@@ -97,7 +100,7 @@ class MobileRechargeController extends GetxController {
           title: 'সংযোগ বিচ্ছিন্ন',
           greetingsIcon: Icons.wifi_off_outlined,
           greetings:
-              'দুঃখিত, মোবাইল রিচার্জ করার জন্য ইন্টারনেট সংযোগ প্রয়োজন।',
+              'দুঃখিত, মোবাইল রিচার্জ করার জন্য internet সংযোগ প্রয়োজন।',
           isErrorDialogue: true,
           actions: [
             TextButton(
@@ -113,6 +116,28 @@ class MobileRechargeController extends GetxController {
           ],
         );
         return;
+      }
+
+      // Check offline payment settings dynamically
+      final settingsCtrl = Get.put(AdminSettingsController());
+      await settingsCtrl.loadSettings();
+      
+      String paymentMethod = 'wallet';
+      String? offlineGateway;
+      String? offlineSenderMobile;
+      String? offlineTrxId;
+
+      if (settingsCtrl.isOfflinePaymentActive.value) {
+        isLoading.value = false;
+        final offlineDetails = await _showOfflinePaymentSheet(context, amount);
+        if (offlineDetails == null) {
+          return; // User cancelled
+        }
+        isLoading.value = true;
+        paymentMethod = 'offline';
+        offlineGateway = offlineDetails['gateway'];
+        offlineSenderMobile = offlineDetails['sender'];
+        offlineTrxId = offlineDetails['trxId'];
       }
 
       // 2. Account Password Security Verification
@@ -168,9 +193,23 @@ class MobileRechargeController extends GetxController {
         transactionId: txnId,
         rechargeType: package != null ? 'drive' : 'regular',
         drivePackageId: package?.id,
+        paymentMethod: paymentMethod,
+        offlineGateway: offlineGateway,
+        offlineSenderMobile: offlineSenderMobile,
+        offlineTrxId: offlineTrxId,
       );
 
       await _repository.createRecharge(recharge);
+
+      // Send push notification to Admin via Firestore
+      final bool isDrive = recharge.rechargeType == 'drive';
+      await NotificationHelper.sendNotification(
+        title: isDrive ? 'নতুন ড্রাইভ অফার অর্ডার' : 'নতুন মোবাইল রিচার্জ অনুরোধ',
+        body: '${recharge.userName} (${recharge.userMobile}) ৳${recharge.amount} রিচার্জের অনুরোধ পাঠিয়েছেন। নম্বর: ${recharge.mobileNumber}',
+        type: isDrive ? 'drive_order' : 'mobile_recharge',
+        userMobile: recharge.userMobile,
+        isAdmin: true,
+      );
 
       isLoading.value = false;
 
@@ -321,5 +360,348 @@ class MobileRechargeController extends GetxController {
     );
 
     return isConfirmed;
+  }
+
+  Future<Map<String, String>?> _showOfflinePaymentSheet(
+    BuildContext context,
+    double amount,
+  ) async {
+    final settingsCtrl = Get.find<AdminSettingsController>();
+    final formKey = GlobalKey<FormState>();
+    final senderMobileCtrl = TextEditingController();
+    final trxIdCtrl = TextEditingController();
+    String selectedGateway = 'bkash';
+
+    return await showModalBottomSheet<Map<String, String>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Widget gatewayTab(String gatewayId, String iconPath, String label) {
+              final bool isSelected = selectedGateway == gatewayId;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => selectedGateway = gatewayId),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            iconPath,
+                            height: 24,
+                            width: 40,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox.shrink(),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? Colors.black87 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            Widget offlineInstruction(int step, String text, [String? highlightText]) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$step. ',
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                    Expanded(
+                      child: highlightText != null
+                          ? Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  text,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.pink,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    highlightText,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              text,
+                              style: const TextStyle(fontSize: 14, color: Colors.black87),
+                            ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            Widget cardTextField({
+              required TextEditingController controller,
+              required String hint,
+              TextInputType keyboardType = TextInputType.text,
+            }) => TextFormField(
+              controller: controller,
+              keyboardType: keyboardType,
+              validator: (v) => v!.isEmpty ? 'এই ঘরটি পূরণ করুন' : null,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primaryColor),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              ),
+            );
+
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'পেমেন্ট বিবরণ (Offline Payment)',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  'মোট পরিশোধের পরিমাণ: ৳${amount.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade200),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  gatewayTab(
+                                    'bkash',
+                                    'assets/color_icons/finance/BKash-Icon-Logo.wine.png',
+                                    'bKash',
+                                  ),
+                                  gatewayTab(
+                                    'nagad',
+                                    'assets/color_icons/finance/Nagad-Logo.wine.png',
+                                    'Nagad',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Obx(
+                                () => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    offlineInstruction(
+                                      1,
+                                      'আপনার ${selectedGateway == 'bkash' ? 'bKash' : 'Nagad'} অ্যাপ ওপেন করুন',
+                                    ),
+                                    offlineInstruction(
+                                      2,
+                                      'সিলেক্ট করুন',
+                                      selectedGateway == 'bkash'
+                                          ? settingsCtrl.bkashPaymentOption.value
+                                          : settingsCtrl.nagadPaymentOption.value,
+                                    ),
+                                    offlineInstruction(
+                                      3,
+                                      'আমাদের ${selectedGateway == 'bkash' ? settingsCtrl.bkashAccountType.value : settingsCtrl.nagadAccountType.value} অ্যাকাউন্ট নম্বরটি দিন',
+                                      selectedGateway == 'bkash'
+                                          ? settingsCtrl.bkashAccountNumber.value
+                                          : settingsCtrl.nagadAccountNumber.value,
+                                    ),
+                                    offlineInstruction(
+                                      4,
+                                      'মোট বিলের পরিমাণটি দিন',
+                                      '${amount.toStringAsFixed(2)} টাকা',
+                                    ),
+                                    offlineInstruction(
+                                      5,
+                                      'এবার আপনার পিন নম্বরটি দিন',
+                                    ),
+                                    offlineInstruction(
+                                      6,
+                                      'পেমেন্ট করতে ট্যাপ করে ধরে রাখুন',
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'যে নম্বর থেকে টাকা পাঠিয়েছেন',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    cardTextField(
+                                      controller: senderMobileCtrl,
+                                      hint: 'যেমন: 01XXXXXXXXX',
+                                      keyboardType: TextInputType.phone,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'ট্রানজ্যাকশন আইডি (TrxID)',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    cardTextField(
+                                      controller: trxIdCtrl,
+                                      hint: 'যেমন: 8N77DAK99L',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              Navigator.pop(ctx, {
+                                'gateway': selectedGateway,
+                                'sender': senderMobileCtrl.text.trim(),
+                                'trxId': trxIdCtrl.text.trim(),
+                              });
+                            }
+                          },
+                          child: const Text(
+                            'পেমেন্ট নিশ্চিত করুন',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }
