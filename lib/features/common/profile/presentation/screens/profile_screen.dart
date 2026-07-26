@@ -21,9 +21,6 @@ class UserProfileScreen extends StatelessWidget {
     final controller = Get.put(AdminProfileController());
     final authController = AuthController.instance;
 
-    // Reactive switch state for demo toggle
-    final RxBool isSystemActive = true.obs;
-
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Obx(() {
@@ -342,6 +339,7 @@ class UserProfileScreen extends StatelessWidget {
                     ProfileMenuItem(
                       leadingIcon: Icons.location_on_outlined,
                       title: 'আমার ঠিকানা',
+                      subtitle: controller.address.value,
                       onTap: () {
                         _showUpdateAddressBottomSheet(context, controller);
                       },
@@ -559,7 +557,7 @@ class UserProfileScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -570,13 +568,13 @@ class UserProfileScreen extends StatelessWidget {
                         child: const Text('সংরক্ষণ করুন'),
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            final success = await controller.updateProfile(
-                              newName: nameController.text.trim(),
-                              newEmail: emailController.text.trim(),
+                            final name = nameController.text.trim();
+                            final email = emailController.text.trim();
+                            Get.back();
+                            await controller.updateProfile(
+                              newName: name,
+                              newEmail: email,
                             );
-                            if (success) {
-                              Get.back();
-                            }
                           }
                         },
                       ),
@@ -606,7 +604,23 @@ class UserProfileScreen extends StatelessWidget {
 
     // Optional: Try to prefill
     if (controller.address.value.isNotEmpty) {
-      streetController.text = controller.address.value;
+      final addr = controller.address.value;
+      final houseMatch = RegExp(r'বাসা:\s*([^,]+)').firstMatch(addr);
+      final streetMatch = RegExp(r'রাস্তা:\s*([^,]+)').firstMatch(addr);
+      final cityMatch = RegExp(r'শহর:\s*([^,]+)').firstMatch(addr);
+      final divisionMatch = RegExp(r'বিভাগ:\s*([^,]+)').firstMatch(addr);
+      final postcodeMatch = RegExp(r'পোস্টকোড:\s*([^,]+)').firstMatch(addr);
+
+      if (houseMatch != null) houseController.text = houseMatch.group(1)!.trim();
+      if (streetMatch != null) streetController.text = streetMatch.group(1)!.trim();
+      if (cityMatch != null) cityController.text = cityMatch.group(1)!.trim();
+      if (divisionMatch != null) divisionController.text = divisionMatch.group(1)!.trim();
+      if (postcodeMatch != null) postcodeController.text = postcodeMatch.group(1)!.trim();
+
+      // Fallback
+      if (streetController.text.isEmpty && houseController.text.isEmpty && cityController.text.isEmpty) {
+        streetController.text = addr;
+      }
     }
     final formKey = GlobalKey<FormState>();
 
@@ -694,13 +708,16 @@ class UserProfileScreen extends StatelessWidget {
                               ? null
                               : () async {
                                   if (formKey.currentState!.validate()) {
-                                    final fullAddress =
-                                        'বাসা: ${houseController.text.trim()}, রাস্তা: ${streetController.text.trim()}, শহর: ${cityController.text.trim()}, বিভাগ: ${divisionController.text.trim()}, পোস্টকোড: ${postcodeController.text.trim()}';
-                                    final success = await controller
-                                        .updateAddress(fullAddress);
-                                    if (success) {
-                                      Get.back();
-                                    }
+                                    final house = houseController.text.trim();
+                                    final street = streetController.text.trim();
+                                    final city = cityController.text.trim();
+                                    final division = divisionController.text.trim();
+                                    final postcode = postcodeController.text.trim();
+                                    
+                                    final addressStr = 'বাসা: $house, রাস্তা: $street, শহর: $city, বিভাগ: $division, পোস্টকোড: $postcode';
+                                    
+                                    Get.back(); // Close bottom sheet first
+                                    await controller.updateAddress(addressStr);
                                   }
                                 },
                           child: controller.isLoading.value
@@ -901,10 +918,12 @@ class UserProfileScreen extends StatelessWidget {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'অনুগ্রহ করে নতুন পাসওয়ার্ড লিখুন';
-                      if (value.length < 6)
+                      }
+                      if (value.length < 6) {
                         return 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে';
+                      }
                       return null;
                     },
                   ),
@@ -957,10 +976,12 @@ class UserProfileScreen extends StatelessWidget {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'অনুগ্রহ করে পাসওয়ার্ড নিশ্চিত করুন';
-                      if (value != newPasswordController.text)
-                        return 'পাসওয়ার্ড মিলেনি';
+                      if (value == null || value.isEmpty) {
+                        return 'নতুন পাসওয়ার্ড নিশ্চিত করুন';
+                      }
+                      if (value != newPasswordController.text) {
+                        return 'পাসওয়ার্ড দুটি মিলছে না';
+                      }
                       return null;
                     },
                   ),
@@ -990,7 +1011,7 @@ class UserProfileScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -1001,13 +1022,13 @@ class UserProfileScreen extends StatelessWidget {
                         child: const Text('সংরক্ষণ করুন'),
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            final success = await controller.changePassword(
-                              oldPassword: oldPasswordController.text,
-                              newPassword: newPasswordController.text,
+                            final oldP = oldPasswordController.text;
+                            final newP = newPasswordController.text;
+                            Get.back();
+                            await controller.changePassword(
+                              oldPassword: oldP,
+                              newPassword: newP,
                             );
-                            if (success) {
-                              Get.back();
-                            }
                           }
                         },
                       ),

@@ -34,9 +34,9 @@ class MobileRechargeController extends GetxController {
     // Strip non-digit characters
     String cleanNumber = number.replaceAll(RegExp(r'\D'), '');
 
-    // Strip country code if present (+880 or 880)
+    // Strip country code if present (+880 or 880 or 88)
     if (cleanNumber.startsWith('880')) {
-      cleanNumber = cleanNumber.substring(2);
+      cleanNumber = cleanNumber.substring(3);
     } else if (cleanNumber.startsWith('88')) {
       cleanNumber = cleanNumber.substring(2);
     }
@@ -51,23 +51,58 @@ class MobileRechargeController extends GetxController {
 
     // GP: 017, 013
     // Robi: 018
+    // Airtel: 016
     // Banglalink: 019, 014
     // Teletalk: 015
-    // Airtel: 016
     String detectedName = '';
+    List<String> keywords = [];
+
     if (prefix == '017' || prefix == '013') {
       detectedName = 'Grameenphone';
-    } else if (prefix == '018' || prefix == '016') {
-      detectedName = 'Robi'; // Robi and Airtel combined
+      keywords = ['grameenphone', 'grameen', 'gp', '017', '013', 'গ্রামীন', 'গ্রামীণ'];
+    } else if (prefix == '018') {
+      detectedName = 'Robi';
+      keywords = ['robi', '018', 'রবি'];
+    } else if (prefix == '016') {
+      detectedName = 'Airtel';
+      keywords = ['airtel', '016', 'এয়ারটেল', 'এয়ারটেল'];
     } else if (prefix == '019' || prefix == '014') {
       detectedName = 'Banglalink';
+      keywords = ['banglalink', 'bangla', 'bl', '019', '014', 'বাংলালিংক'];
     } else if (prefix == '015') {
       detectedName = 'Teletalk';
+      keywords = ['teletalk', 'taletalk', 'tele', 'tale', '015', 'টেলিটক', 'টিলিটক'];
     }
 
-    if (detectedName.isEmpty) return null;
-    return operators.firstWhereOrNull(
-      (op) => op.name.toLowerCase().contains(detectedName.toLowerCase()),
+    if (keywords.isEmpty) return null;
+
+    if (operators.isNotEmpty) {
+      final match = operators.firstWhereOrNull((op) {
+        final nameLower = op.name.trim().toLowerCase();
+        final idLower = op.id.trim().toLowerCase();
+
+        return keywords.any((kw) {
+          if (kw == 'gp' || kw == 'bl') {
+            return nameLower == kw || idLower == kw || nameLower.startsWith(kw);
+          }
+          return nameLower.contains(kw) ||
+              kw.contains(nameLower) ||
+              idLower.contains(kw) ||
+              kw.contains(idLower);
+        });
+      });
+
+      if (match != null) return match;
+    }
+
+    // Fallback: If no operator document in Firestore matches, return a default local OperatorModel
+    // so that valid prefixes like 015 ALWAYS detect Teletalk!
+    return OperatorModel(
+      id: detectedName.toLowerCase(),
+      name: detectedName,
+      logoUrl: '',
+      status: true,
+      createdAt: DateTime.now(),
     );
   }
 

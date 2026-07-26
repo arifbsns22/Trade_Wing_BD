@@ -551,7 +551,7 @@ class AdminProfileScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -562,13 +562,13 @@ class AdminProfileScreen extends StatelessWidget {
                         child: const Text('সংরক্ষণ করুন'),
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            final success = await controller.updateProfile(
-                              newName: nameController.text.trim(),
-                              newEmail: emailController.text.trim(),
+                            final name = nameController.text.trim();
+                            final email = emailController.text.trim();
+                            Get.back(); // Close bottom sheet first
+                            await controller.updateProfile(
+                              newName: name,
+                              newEmail: email,
                             );
-                            if (success) {
-                              Get.back();
-                            }
                           }
                         },
                       ),

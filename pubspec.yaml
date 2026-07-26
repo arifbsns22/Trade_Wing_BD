@@ -41,7 +41,6 @@ dependencies:
   connectivity_plus: ^7.3.0
   video_player: ^2.13.0
   youtube_player_iframe: ^6.0.2
-  web: ^1.1.1
 
 
 dev_dependencies:

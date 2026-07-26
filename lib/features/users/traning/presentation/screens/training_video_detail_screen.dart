@@ -9,10 +9,6 @@ import 'package:trade_wign_bd/features/admin/traning/presentation/controllers/tr
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
-// Conditionally import HTML libraries for Web
-import 'dart:ui_web' as ui_web;
-import 'package:web/web.dart' as web;
-
 class TrainingVideoDetailScreen extends StatefulWidget {
   final TrainingModel training;
 
@@ -24,9 +20,8 @@ class TrainingVideoDetailScreen extends StatefulWidget {
 }
 
 class _TrainingVideoDetailScreenState extends State<TrainingVideoDetailScreen> {
-  YoutubePlayerController? _mobileController;
+  YoutubePlayerController? _controller;
   String? _videoId;
-  String? _webRegisterKey;
 
   @override
   void initState() {
@@ -36,43 +31,22 @@ class _TrainingVideoDetailScreenState extends State<TrainingVideoDetailScreen> {
         TrainingModel.extractYoutubeId(widget.training.videoUrl ?? '');
 
     if (_videoId != null && _videoId!.isNotEmpty) {
-      if (kIsWeb) {
-        _webRegisterKey =
-            'youtube-iframe-$_videoId-${DateTime.now().millisecondsSinceEpoch}';
-        ui_web.platformViewRegistry.registerViewFactory(_webRegisterKey!, (
-          int viewId,
-        ) {
-          final iframe = web.HTMLIFrameElement()
-            ..src =
-                'https://www.youtube.com/embed/$_videoId?autoplay=1&rel=0&enablejsapi=1'
-            ..style.border = 'none'
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..allow =
-                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-            ..allowFullscreen = true;
-          return iframe;
-        });
-      } else {
-        _mobileController = YoutubePlayerController.fromVideoId(
-          videoId: _videoId!,
-          autoPlay: true,
-          params: const YoutubePlayerParams(
-            showControls: true,
-            showFullscreenButton: true,
-            mute: false,
-            strictRelatedVideos: true,
-          ),
-        );
-      }
+      _controller = YoutubePlayerController.fromVideoId(
+        videoId: _videoId!,
+        autoPlay: true,
+        params: const YoutubePlayerParams(
+          showControls: true,
+          showFullscreenButton: true,
+          mute: false,
+          strictRelatedVideos: true,
+        ),
+      );
     }
   }
 
   @override
   void dispose() {
-    if (!kIsWeb) {
-      _mobileController?.close();
-    }
+    _controller?.close();
     super.dispose();
   }
 
@@ -143,13 +117,9 @@ class _TrainingVideoDetailScreenState extends State<TrainingVideoDetailScreen> {
                           ],
                         ),
                       )
-                    : kIsWeb
-                    ? (_webRegisterKey != null
-                          ? HtmlElementView(viewType: _webRegisterKey!)
-                          : const Center(child: CircularProgressIndicator()))
-                    : (_mobileController != null
+                    : (_controller != null
                           ? YoutubePlayer(
-                              controller: _mobileController!,
+                              controller: _controller!,
                               aspectRatio: 16 / 9,
                             )
                           : const Center(child: CircularProgressIndicator())),

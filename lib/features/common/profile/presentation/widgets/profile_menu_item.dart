@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ProfileMenuItem extends StatelessWidget {
   final IconData leadingIcon;
   final String title;
+  final String? subtitle;
   final VoidCallback onTap;
   final Color? iconColor;
   final Color? textColor;
@@ -12,6 +13,7 @@ class ProfileMenuItem extends StatelessWidget {
     super.key,
     required this.leadingIcon,
     required this.title,
+    this.subtitle,
     required this.onTap,
     this.iconColor,
     this.textColor,
@@ -61,6 +63,17 @@ class ProfileMenuItem extends StatelessWidget {
               color: textColor ?? Colors.black87,
             ),
           ),
+          subtitle: subtitle != null && subtitle!.trim().isNotEmpty
+              ? Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              : null,
           trailing: trailing ?? Icon(
             Icons.chevron_right_rounded,
             color: Colors.grey.shade400,

@@ -26,15 +26,19 @@ class _QuickRechargeWidgetState extends State<QuickRechargeWidget> {
   void initState() {
     super.initState();
     // Auto-detect operator whenever phone number changes
-    _numberController.addListener(() {
-      final detected = _rechargeController.detectOperator(
-        _numberController.text,
-        _userPackController.operators,
-      );
-      if (detected != null) {
-        _rechargeController.selectedOperator.value = detected;
-      }
-    });
+    _numberController.addListener(_onNumberChanged);
+
+    // Re-evaluate if operators stream in from Firestore
+    ever(_userPackController.operators, (_) => _onNumberChanged());
+  }
+
+  void _onNumberChanged() {
+    final text = _numberController.text.trim();
+    final detected = _rechargeController.detectOperator(
+      text,
+      _userPackController.operators,
+    );
+    _rechargeController.selectedOperator.value = detected;
   }
 
   @override
@@ -187,7 +191,21 @@ class _QuickRechargeWidgetState extends State<QuickRechargeWidget> {
                         child: AspectRatio(
                           aspectRatio: 1.0,
                           child: ClipOval(
-                            child: Image.network(op.logoUrl, fit: BoxFit.cover),
+                            child: op.logoUrl.isNotEmpty
+                                ? Image.network(
+                                    op.logoUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.cell_tower_rounded,
+                                      size: 14,
+                                      color: AppColors.green,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.cell_tower_rounded,
+                                    size: 14,
+                                    color: AppColors.green,
+                                  ),
                           ),
                         ),
                       ),
