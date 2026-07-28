@@ -87,10 +87,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
     _selectedBrand = p?.brand;
 
+    if (p?.type != null && p!.type.isNotEmpty) {
+      _selectedProductType = p.type;
+    }
+
+    if (p?.unit != null && p!.unit.isNotEmpty) {
+      _selectedProductUnit = p.unit;
+      _unit = p.unit;
+    }
+
     // Pricing
     _rolePrices = Map<String, double>.from(p?.rolePrices ?? {});
     _roleRewards = Map<String, int>.from(p?.roleRewards ?? {});
-    _price = _rolePrices['Customer'] ?? _rolePrices['Guest Customer'] ?? 0.0;
+    _price = _rolePrices['Customer'] ?? _rolePrices['Vendor'] ?? _rolePrices['Guest Customer'] ?? 0.0;
 
     _regularPrice = p?.regularPrice ?? _price;
     _discountValue = p?.discount ?? 0.0;
@@ -103,7 +112,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     // Inventory
     _stock = p?.stock ?? 0;
-    _unit = p?.unit ?? 'pcs';
 
     // Variants
     _sizes = List<String>.from(p?.sizes ?? []);
@@ -257,7 +265,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
         _rolePrices['Customer'] == null ||
         _rolePrices['Customer']! <= 0) {
       _rolePrices['Customer'] = _price;
-      _rolePrices['Guest Customer'] = _price;
     }
 
     // Show custom progress dialog matching the video
@@ -348,23 +355,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
     } catch (e) {
       Navigator.pop(context); // Close dialog if crash
       Get.snackbar(
-  'ব্যর্থতা',
-  'পণ্য আপলোড করতে সমস্যা হয়েছে: $e',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+        'ব্যর্থতা',
+        'পণ্য আপলোড করতে সমস্যা হয়েছে: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
     }
   }
 
-  // Smart Auto-Fill pricing logic for the 10 roles
+  // Smart Auto-Fill pricing logic
   void _autoFillRolePrices(double basePrice) {
     setState(() {
+      _rolePrices['Vendor'] = double.parse(
+        (basePrice * 0.85).toStringAsFixed(2),
+      ); // Vendor rate (15% discount)
       _rolePrices['Customer'] = basePrice;
-      _rolePrices['Guest Customer'] = basePrice;
       _rolePrices['Brand Promoter'] = double.parse(
         (basePrice * 0.95).toStringAsFixed(2),
       ); // 5% discount
@@ -393,8 +402,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Auto-fill Reward Points: 1 point per 10 BDT
       final int basePoints = (basePrice / 10).round();
       for (var role in [
+        'Vendor',
         'Customer',
-        'Guest Customer',
         'Brand Promoter',
         'Sales Partner',
         'Senior Sales Partner',
@@ -408,7 +417,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1847,10 +1855,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ),
                             const SizedBox(height: 10),
 
-                            // Inputs for all 10 roles
+                            // Inputs for roles
                             ...[
+                              'Vendor',
                               'Customer',
-                              'Guest Customer',
                               'Brand Promoter',
                               'Sales Partner',
                               'Senior Sales Partner',
@@ -1860,6 +1868,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               'Master Dealer',
                               'Super Admin',
                             ].map((role) {
+                              final isVendor = role == 'Vendor';
                               final double currentPrice =
                                   _rolePrices[role] ?? 0.0;
                               final int currentPoints = _roleRewards[role] ?? 0;
@@ -1880,22 +1889,85 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFC),
-                                  borderRadius: BorderRadius.circular(10),
+                                  gradient: isVendor
+                                      ? const LinearGradient(
+                                          colors: [
+                                            Color(0xFFFEF3C7),
+                                            Color(0xFFFFFBEB),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        )
+                                      : null,
+                                  color: isVendor ? null : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: const Color(0xFFE2E8F0),
+                                    color: isVendor
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFFE2E8F0),
+                                    width: isVendor ? 1.5 : 1.0,
                                   ),
+                                  boxShadow: isVendor
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xFFF59E0B)
+                                                .withValues(alpha: 0.15),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      role,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        color: Color(0xFF1E293B),
-                                      ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            if (isVendor) ...[
+                                              const Icon(
+                                                Icons.storefront_rounded,
+                                                size: 16,
+                                                color: Color(0xFFD97706),
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+                                            Text(
+                                              role,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: isVendor ? 14 : 13,
+                                                color: isVendor
+                                                    ? const Color(0xFF92400E)
+                                                    : const Color(0xFF1E293B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (isVendor)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF59E0B),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: const Text(
+                                              '★ Vendor Exclusive',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                     const SizedBox(height: 8),
                                     Row(
@@ -1977,10 +2049,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               if (_rolePrices['Customer'] == null ||
                                   _rolePrices['Customer'] == 0) {
                                 _rolePrices['Customer'] = _price;
-                              }
-                              if (_rolePrices['Guest Customer'] == null ||
-                                  _rolePrices['Guest Customer'] == 0) {
-                                _rolePrices['Guest Customer'] = _price;
                               }
                             });
                             Navigator.pop(context);

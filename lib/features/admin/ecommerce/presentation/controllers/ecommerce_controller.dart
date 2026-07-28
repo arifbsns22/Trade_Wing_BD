@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import '../../domain/models/product_model.dart';
 
 class EcommerceController extends GetxController {
@@ -444,7 +445,19 @@ class EcommerceController extends GetxController {
   Future<bool> addProduct(Product product) async {
     try {
       isLoading.value = true;
-      await _firestore.collection('products').add(product.toFirestore());
+      final String adminMobile = Get.find<AuthController>().currentUserMobile.value;
+      String adminShopName = '';
+      if (adminMobile.isNotEmpty) {
+        final userDoc = await _firestore.collection('users').doc(adminMobile).get();
+        if (userDoc.exists && userDoc.data() != null) {
+          adminShopName = (userDoc.data()!['shopName'] as String?) ?? '';
+        }
+      }
+
+      final Map<String, dynamic> data = product.toFirestore();
+      data['shopName'] = adminShopName.isNotEmpty ? adminShopName : 'Trade Wing BD';
+
+      await _firestore.collection('products').add(data);
       Get.snackbar(
   'সফল',
   'পণ্যটি সফলভাবে যুক্ত করা হয়েছে',
@@ -478,7 +491,19 @@ class EcommerceController extends GetxController {
   Future<bool> updateProduct(String productId, Product product) async {
     try {
       isLoading.value = true;
-      await _firestore.collection('products').doc(productId).update(product.toFirestore());
+      final String adminMobile = Get.find<AuthController>().currentUserMobile.value;
+      String adminShopName = '';
+      if (adminMobile.isNotEmpty) {
+        final userDoc = await _firestore.collection('users').doc(adminMobile).get();
+        if (userDoc.exists && userDoc.data() != null) {
+          adminShopName = (userDoc.data()!['shopName'] as String?) ?? '';
+        }
+      }
+
+      final Map<String, dynamic> data = product.toFirestore();
+      data['shopName'] = adminShopName.isNotEmpty ? adminShopName : 'Trade Wing BD';
+
+      await _firestore.collection('products').doc(productId).update(data);
       Get.snackbar(
   'সফল',
   'পণ্যটির তথ্য সফলভাবে আপডেট করা হয়েছে',

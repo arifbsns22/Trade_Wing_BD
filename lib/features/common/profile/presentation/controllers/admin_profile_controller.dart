@@ -23,6 +23,7 @@ class AdminProfileController extends GetxController {
   final RxString referralCode = ''.obs;
   final RxString profilePicture = ''.obs;
   final RxString address = ''.obs;
+  final RxString shopName = ''.obs;
   final RxInt totalRewardPoints = 0.obs;
   final RxDouble totalPurchasedAmount = 0.0.obs;
 
@@ -56,6 +57,7 @@ class AdminProfileController extends GetxController {
           email.value = data['email'] ?? '';
           profilePicture.value = data['profilePicture'] ?? '';
           address.value = data['address'] ?? '';
+          shopName.value = data['shopName'] ?? '';
           // Dynamically calculate from orders
           try {
             final ordersSnapshot = await _firestore
@@ -145,6 +147,7 @@ class AdminProfileController extends GetxController {
   Future<bool> updateProfile({
     required String newName,
     required String newEmail,
+    required String newShopName,
   }) async {
     final String currentMobile = _authController.currentUserMobile.value;
     if (currentMobile.isEmpty) return false;
@@ -155,11 +158,47 @@ class AdminProfileController extends GetxController {
       await _firestore.collection('users').doc(currentMobile).update({
         'name': newName,
         'email': newEmail,
+        'shopName': newShopName,
       });
+
+      // Sync the shopName to all products owned by this user
+      final String role = _authController.currentUserRole.value.toLowerCase().trim();
+      final bool isAdmin = role == 'admin' || role == 'super admin';
+
+      if (isAdmin) {
+        // Update all admin products (where isVendorProduct is not true)
+        final productsSnapshot = await _firestore.collection('products').get();
+        final batch = _firestore.batch();
+        int count = 0;
+        for (var doc in productsSnapshot.docs) {
+          final isVendor = doc.data()['isVendorProduct'] as bool? ?? false;
+          if (!isVendor) {
+            batch.update(doc.reference, {'shopName': newShopName});
+            count++;
+          }
+        }
+        if (count > 0) {
+          await batch.commit();
+        }
+      } else {
+        // Update all vendor products (where vendorMobile matches)
+        final productsSnapshot = await _firestore
+            .collection('products')
+            .where('vendorMobile', isEqualTo: currentMobile)
+            .get();
+        if (productsSnapshot.docs.isNotEmpty) {
+          final batch = _firestore.batch();
+          for (var doc in productsSnapshot.docs) {
+            batch.update(doc.reference, {'shopName': newShopName});
+          }
+          await batch.commit();
+        }
+      }
 
       // Update local reactive states
       name.value = newName;
       email.value = newEmail;
+      shopName.value = newShopName;
 
       // Update AuthController
       _authController.currentUserName.value = newName;

@@ -21,6 +21,7 @@ class Product {
   final Map<String, double> rolePrices;
   final Map<String, int> roleRewards;
   final DateTime? createdAt;
+  final String? shopName;
 
   Product({
     this.id,
@@ -43,6 +44,7 @@ class Product {
     required this.rolePrices,
     required this.roleRewards,
     this.createdAt,
+    this.shopName,
   });
 
   // Convert Firestore DocumentSnapshot to Product object
@@ -86,6 +88,7 @@ class Product {
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : null,
+      shopName: data['shopName'],
     );
   }
 
@@ -111,6 +114,7 @@ class Product {
       'rolePrices': rolePrices,
       'roleRewards': roleRewards,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'shopName': shopName,
     };
   }
 }

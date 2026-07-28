@@ -168,6 +168,17 @@ class UserProfileScreen extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
+                          if (controller.shopName.value.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'দোকান: ${controller.shopName.value}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF08B3AC),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 4),
 
                           // Mobile
@@ -408,9 +419,17 @@ class UserProfileScreen extends StatelessWidget {
     BuildContext context,
     AdminProfileController controller,
   ) {
+    final authController = AuthController.instance;
     final nameController = TextEditingController(text: controller.name.value);
     final emailController = TextEditingController(text: controller.email.value);
+    final shopNameController = TextEditingController(text: controller.shopName.value);
     final formKey = GlobalKey<FormState>();
+
+    final String userRole = authController.currentUserRole.value.toLowerCase().trim();
+    final bool isMerchant = userRole == 'admin' ||
+        userRole == 'super admin' ||
+        userRole == 'vendor' ||
+        userRole == 'reseller';
 
     Get.bottomSheet(
       Container(
@@ -532,6 +551,43 @@ class UserProfileScreen extends StatelessWidget {
                     return null;
                   },
                 ),
+
+                if (isMerchant) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'দোকানের নাম (Shop Name)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: shopNameController,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                      hintText: 'আপনার দোকানের নাম লিখুন',
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: AppColors.primaryColor,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
 
                 // Action Buttons
@@ -570,10 +626,12 @@ class UserProfileScreen extends StatelessWidget {
                           if (formKey.currentState!.validate()) {
                             final name = nameController.text.trim();
                             final email = emailController.text.trim();
+                            final shop = shopNameController.text.trim();
                             Get.back();
                             await controller.updateProfile(
                               newName: name,
                               newEmail: email,
+                              newShopName: shop,
                             );
                           }
                         },

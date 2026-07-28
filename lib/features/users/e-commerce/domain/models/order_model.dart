@@ -30,6 +30,16 @@ class OrderModel {
   final PaymentStatus paymentStatus;
   final DateTime createdAt;
 
+  // Metadata fields for vendor/reseller support
+  final bool isVendorOrder;
+  final String? vendorMobile;
+  final double vendorProfit;
+  final double vendorPurchasePrice;
+  final bool isResellerOrder;
+  final String? resellerMobile;
+  final double resellerEarnings;
+  final double adminCommission;
+
   OrderModel({
     required this.orderId,
     required this.userMobile,
@@ -45,6 +55,14 @@ class OrderModel {
     this.orderStatus = OrderStatus.pending,
     this.paymentStatus = PaymentStatus.pending,
     required this.createdAt,
+    this.isVendorOrder = false,
+    this.vendorMobile,
+    this.vendorProfit = 0.0,
+    this.vendorPurchasePrice = 0.0,
+    this.isResellerOrder = false,
+    this.resellerMobile,
+    this.resellerEarnings = 0.0,
+    this.adminCommission = 0.0,
   });
 
   Map<String, dynamic> toMap() {
@@ -63,6 +81,14 @@ class OrderModel {
       'orderStatus': orderStatus.name,
       'paymentStatus': paymentStatus.name,
       'createdAt': Timestamp.fromDate(createdAt),
+      'isVendorOrder': isVendorOrder,
+      'vendorMobile': vendorMobile,
+      'vendorProfit': vendorProfit,
+      'vendorPurchasePrice': vendorPurchasePrice,
+      'isResellerOrder': isResellerOrder,
+      'resellerMobile': resellerMobile,
+      'resellerEarnings': resellerEarnings,
+      'adminCommission': adminCommission,
     };
   }
 
@@ -82,6 +108,14 @@ class OrderModel {
       orderStatus: _parseOrderStatus(map['orderStatus']),
       paymentStatus: _parsePaymentStatus(map['paymentStatus']),
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isVendorOrder: map['isVendorOrder'] ?? false,
+      vendorMobile: map['vendorMobile'],
+      vendorProfit: (map['vendorProfit'] ?? 0.0).toDouble(),
+      vendorPurchasePrice: (map['vendorPurchasePrice'] ?? 0.0).toDouble(),
+      isResellerOrder: map['isResellerOrder'] ?? false,
+      resellerMobile: map['resellerMobile'],
+      resellerEarnings: (map['resellerEarnings'] ?? 0.0).toDouble(),
+      adminCommission: (map['adminCommission'] ?? 0.0).toDouble(),
     );
   }
 

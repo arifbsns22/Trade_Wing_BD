@@ -852,10 +852,91 @@ class _PaymentScreenState extends State<PaymentScreen> {
         createdAt: DateTime.now(),
       );
 
+      // Check if this order contains a vendor product
+      String? vendorMobile;
+      double totalVendorProfit = 0.0;
+      double totalVendorPurchasePrice = 0.0;
+      bool isVendorOrder = false;
+
+      // Get the reseller commission percentage
+      double resellerCommissionPercent = 5.0;
+      try {
+        final settingsDoc = await FirebaseFirestore.instance.collection('app_settings').doc('global').get();
+        if (settingsDoc.exists) {
+          resellerCommissionPercent = (settingsDoc.data()?['resellerCommission'] as num?)?.toDouble() ?? 5.0;
+        }
+      } catch (e) {
+        debugPrint("Error loading reseller commission setting: $e");
+      }
+
+      String? resellerMobile;
+      double totalResellerEarnings = 0.0;
+      double totalAdminCommission = 0.0;
+      bool isResellerOrder = false;
+
+      for (final item in itemsData) {
+        final pId = item['productId'] as String?;
+        if (pId != null) {
+          if (pId.startsWith('vendor_')) {
+            isVendorOrder = true;
+            try {
+              final prodDoc = await FirebaseFirestore.instance.collection('products').doc(pId).get();
+              if (prodDoc.exists) {
+                final pData = prodDoc.data();
+                if (pData != null) {
+                  vendorMobile = pData['vendorMobile'] as String?;
+                  final double vendorPrice = (pData['vendorPrice'] as num?)?.toDouble() ?? 0.0;
+                  final double customerPrice = (item['price'] as num?)?.toDouble() ?? 0.0;
+                  final int qty = (item['quantity'] as num?)?.toInt() ?? 1;
+                  totalVendorProfit += (customerPrice - vendorPrice) * qty;
+                  totalVendorPurchasePrice += vendorPrice * qty;
+                }
+              }
+            } catch (e) {
+              debugPrint("Error fetching vendor product details: $e");
+            }
+          } else if (pId.startsWith('reseller_')) {
+            isResellerOrder = true;
+            try {
+              final prodDoc = await FirebaseFirestore.instance.collection('products').doc(pId).get();
+              if (prodDoc.exists) {
+                final pData = prodDoc.data();
+                if (pData != null) {
+                  resellerMobile = pData['resellerMobile'] as String?;
+                  final double customerPrice = (item['price'] as num?)?.toDouble() ?? 0.0;
+                  final int qty = (item['quantity'] as num?)?.toInt() ?? 1;
+                  final double itemTotal = customerPrice * qty;
+                  final double comm = (itemTotal * resellerCommissionPercent) / 100.0;
+                  totalAdminCommission += comm;
+                  totalResellerEarnings += (itemTotal - comm);
+                }
+              }
+            } catch (e) {
+              debugPrint("Error fetching reseller product details: $e");
+            }
+          }
+        }
+      }
+
+      final Map<String, dynamic> orderMap = orderModel.toMap();
+      if (isVendorOrder && vendorMobile != null) {
+        orderMap['vendorMobile'] = vendorMobile;
+        orderMap['vendorProfit'] = totalVendorProfit;
+        orderMap['vendorPurchasePrice'] = totalVendorPurchasePrice;
+        orderMap['isVendorOrder'] = true;
+      }
+
+      if (isResellerOrder && resellerMobile != null) {
+        orderMap['resellerMobile'] = resellerMobile;
+        orderMap['resellerEarnings'] = totalResellerEarnings;
+        orderMap['adminCommission'] = totalAdminCommission;
+        orderMap['isResellerOrder'] = true;
+      }
+
       await FirebaseFirestore.instance
           .collection('orders')
           .doc(orderId)
-          .set(orderModel.toMap());
+          .set(orderMap);
 
       // Send real-time notification to Admin
       await NotificationHelper.sendNotification(

@@ -27,6 +27,9 @@ class AdminSettingsController extends GetxController {
   final RxBool isMaintenanceMode = false.obs;
 
   // Payment states
+  final RxDouble vendorCommission = 0.0.obs;
+  final RxDouble resellerCommission = 5.0.obs;
+
   final RxBool isCodActive = true.obs;
   final RxString codName = 'Cash On Delivery'.obs;
   final RxString codAmount = '0'.obs;
@@ -132,6 +135,9 @@ class AdminSettingsController extends GetxController {
       nagadAccountType.value =
           prefs.getString('settings_payment_nagad_type') ?? 'Personal';
 
+      vendorCommission.value = prefs.getDouble('settings_commission_vendor') ?? 0.0;
+      resellerCommission.value = prefs.getDouble('settings_commission_reseller') ?? 5.0;
+
       // Override runtime in-memory ImagePath values if we have cached custom logo paths
       if (customLightLogoPath.value.isNotEmpty) {
         ImagePath.lightLogoPng = customLightLogoPath.value;
@@ -196,6 +202,9 @@ class AdminSettingsController extends GetxController {
               data['nagadPaymentOption'] ?? nagadPaymentOption.value;
           nagadAccountType.value =
               data['nagadAccountType'] ?? nagadAccountType.value;
+
+          vendorCommission.value = ((data['vendorCommission'] ?? vendorCommission.value) as num).toDouble();
+          resellerCommission.value = ((data['resellerCommission'] ?? resellerCommission.value) as num).toDouble();
 
           if (data['lightLogo'] != null && customLightLogoPath.value.isEmpty) {
             customLightLogoPath.value = data['lightLogo'];
@@ -300,6 +309,9 @@ class AdminSettingsController extends GetxController {
         nagadAccountType.value,
       );
 
+      await prefs.setDouble('settings_commission_vendor', vendorCommission.value);
+      await prefs.setDouble('settings_commission_reseller', resellerCommission.value);
+
       // Save modules state
       activeModules.forEach((key, value) async {
         await prefs.setBool('module_active_$key', value);
@@ -316,6 +328,8 @@ class AdminSettingsController extends GetxController {
         'lightLogo': customLightLogoPath.value,
         'darkLogo': customDarkLogoPath.value,
         'modules': Map<String, bool>.from(activeModules),
+        'vendorCommission': vendorCommission.value,
+        'resellerCommission': resellerCommission.value,
         'isCodActive': isCodActive.value,
         'codName': codName.value,
         'codAmount': codAmount.value,

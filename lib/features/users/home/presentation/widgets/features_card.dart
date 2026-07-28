@@ -13,6 +13,9 @@ import 'package:trade_wign_bd/features/users/club/presentation/screens/business_
 import 'package:trade_wign_bd/features/users/drive_pack/presentation/screens/user_drive_pack_screens.dart';
 import 'package:trade_wign_bd/features/users/traning/presentation/screens/user_traning_screen.dart';
 
+import 'package:trade_wign_bd/features/users/vendor/presentation/screens/vendor_dashboard_screen.dart';
+import 'package:trade_wign_bd/features/users/reseller/presentation/screens/reseller_dashboard_screen.dart';
+
 class FeatureItem {
   final String title;
   final String imagePath;
@@ -36,8 +39,50 @@ final List<FeatureItem> featureList = [
       Get.to(() => const UserDrivePackScreen());
     },
   ),
-  FeatureItem(title: AppTexts.reselling, imagePath: FeaturesPath.reselling),
-  FeatureItem(title: AppTexts.vendorship, imagePath: FeaturesPath.vendorship),
+  FeatureItem(
+    title: AppTexts.reselling,
+    imagePath: FeaturesPath.reselling,
+    onTap: () {
+      final authController = Get.find<AuthController>();
+      final role = authController.currentUserRole.value.toLowerCase().trim();
+      if (role == 'reseller' || role == 'admin' || role == 'super admin') {
+        Get.to(() => const ResellerDashboardScreen());
+      } else {
+        Get.snackbar(
+          'প্রবেশাধিকার সংরক্ষিত',
+          'এই বিভাগটি শুধুমাত্র নিবন্ধিত রিসেলারদের জন্য সংরক্ষিত।',
+          backgroundColor: Colors.white.withValues(alpha: 0.9),
+          colorText: Colors.black87,
+          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+          borderWidth: 1,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    },
+  ),
+  FeatureItem(
+    title: AppTexts.vendorship,
+    imagePath: FeaturesPath.vendorship,
+    onTap: () {
+      final authController = Get.find<AuthController>();
+      final role = authController.currentUserRole.value.toLowerCase().trim();
+      if (role == 'vendor' || role == 'admin' || role == 'super admin') {
+        Get.to(() => const VendorDashboardScreen());
+      } else {
+        Get.snackbar(
+          'প্রবেশাধিকার সংরক্ষিত',
+          'এই বিভাগটি শুধুমাত্র নিবন্ধিত ভেন্ডরদের জন্য সংরক্ষিত।',
+          backgroundColor: Colors.white.withValues(alpha: 0.9),
+          colorText: Colors.black87,
+          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+          borderWidth: 1,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    },
+  ),
 
   FeatureItem(title: AppTexts.parcel, imagePath: FeaturesPath.parcel),
   FeatureItem(

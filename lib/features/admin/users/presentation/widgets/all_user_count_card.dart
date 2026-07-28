@@ -28,6 +28,10 @@ class UserCountCard extends StatelessWidget {
         return 'সুপার এডমিন';
       case 'Customer':
         return 'কাস্টমার';
+      case 'Vendor':
+        return 'ভেন্ডর';
+      case 'Reseller':
+        return 'রিসেলার';
       case 'Brand Promoter':
         return 'ব্র্যান্ড প্রমোটর';
       case 'Sales Partner':
@@ -65,6 +69,8 @@ class UserCountCard extends StatelessWidget {
     // Get an icon based on role (simple mapping)
     IconData roleIcon = Icons.people_outline;
     if (title.contains('Admin')) roleIcon = Icons.admin_panel_settings_outlined;
+    if (title.contains('Vendor') || title.contains('Reseller'))
+      roleIcon = Icons.storefront_outlined;
     if (title.contains('Sales') || title.contains('Dealer'))
       roleIcon = Icons.store_mall_directory_outlined;
     if (title.contains('Promoter')) roleIcon = Icons.campaign_outlined;

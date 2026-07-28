@@ -168,7 +168,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             height: 1.2,
                           ),
                         ),
-                        if (product.unit.isNotEmpty) ...[
+                         if (product.unit.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             product.unit,
@@ -179,6 +179,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             ),
                           ),
                         ],
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.storefront_rounded,
+                              size: 16,
+                              color: Color(0xFF08B3AC),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              product.shopName?.isNotEmpty == true
+                                  ? product.shopName!
+                                  : 'Trade Wing BD',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
 
                         // Price + Fast Delivery

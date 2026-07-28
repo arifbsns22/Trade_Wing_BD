@@ -13,6 +13,10 @@ class AddUserScreen extends StatelessWidget {
         return 'সুপার এডমিন';
       case 'Customer':
         return 'কাস্টমার';
+      case 'Vendor':
+        return 'ভেন্ডর';
+      case 'Reseller':
+        return 'রিসেলার';
       case 'Brand Promoter':
         return 'ব্র্যান্ড প্রমোটর';
       case 'Sales Partner':

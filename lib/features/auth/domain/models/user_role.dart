@@ -11,6 +11,8 @@ enum UserRole {
   seniorDealer,
   masterDealer,
   regionalDistributor,
+  vendor,
+  reseller,
 }
 
 extension UserRoleExtension on UserRole {
@@ -40,6 +42,10 @@ extension UserRoleExtension on UserRole {
         return 'মাস্টার ডিলার';
       case UserRole.regionalDistributor:
         return 'রিজিওনাল ডিস্ট্রিবিউটর';
+      case UserRole.vendor:
+        return 'ভেন্ডর';
+      case UserRole.reseller:
+        return 'রিসেলার';
     }
   }
 
@@ -69,6 +75,10 @@ extension UserRoleExtension on UserRole {
         return 'Master Dealer';
       case UserRole.regionalDistributor:
         return 'Regional Distributor';
+      case UserRole.vendor:
+        return 'Vendor';
+      case UserRole.reseller:
+        return 'Reseller';
     }
   }
 
@@ -99,6 +109,10 @@ extension UserRoleExtension on UserRole {
         return UserRole.masterDealer;
       case 'regional distributor':
         return UserRole.regionalDistributor;
+      case 'vendor':
+        return UserRole.vendor;
+      case 'reseller':
+        return UserRole.reseller;
       default:
         return UserRole.customer;
     }

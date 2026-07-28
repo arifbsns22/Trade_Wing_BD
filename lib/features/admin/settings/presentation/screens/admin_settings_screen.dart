@@ -6,6 +6,8 @@ import '../widgets/business_info_tab.dart';
 import '../widgets/payment_tab.dart';
 import '../widgets/customer_wallet_tab.dart';
 import '../widgets/others_tab.dart';
+import '../widgets/vendor_commission_tab.dart';
+import '../widgets/reseller_commission_tab.dart';
 
 class AdminSettingsScreen extends StatelessWidget {
   const AdminSettingsScreen({super.key});
@@ -15,7 +17,7 @@ class AdminSettingsScreen extends StatelessWidget {
     final controller = Get.put(AdminSettingsController());
 
     return DefaultTabController(
-      length: 4,
+      length: 6,
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
@@ -50,6 +52,8 @@ class AdminSettingsScreen extends StatelessWidget {
               Tab(text: 'পেমেন্ট তথ্য'),
               Tab(text: 'কাস্টমার'),
               Tab(text: 'অন্যান্য'),
+              Tab(text: 'ভেন্ডর'),
+              Tab(text: 'রিসেলার'),
             ],
           ),
           actions: [
@@ -89,6 +93,8 @@ class AdminSettingsScreen extends StatelessWidget {
             PaymentTab(),
             CustomerWalletTab(),
             OthersTab(),
+            VendorCommissionTab(),
+            ResellerCommissionTab(),
           ],
         ),
       ),

@@ -18,6 +18,8 @@ class AddUserController extends GetxController {
   final List<String> roles = [
     'Super Admin',
     'Customer',
+    'Vendor',
+    'Reseller',
     'Brand Promoter',
     'Sales Partner',
     'Senior Sales Partner',

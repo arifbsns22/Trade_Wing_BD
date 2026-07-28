@@ -169,6 +169,17 @@ class AdminProfileScreen extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
+                          if (controller.shopName.value.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'দোকান: ${controller.shopName.value}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF08B3AC),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 6),
 
                           // Admin Role & Mobile/Email Detail Row
@@ -410,6 +421,7 @@ class AdminProfileScreen extends StatelessWidget {
   void _showEditProfileBottomSheet(BuildContext context, AdminProfileController controller) {
     final nameController = TextEditingController(text: controller.name.value);
     final emailController = TextEditingController(text: controller.email.value);
+    final shopNameController = TextEditingController(text: controller.shopName.value);
     final formKey = GlobalKey<FormState>();
 
     Get.bottomSheet(
@@ -526,6 +538,39 @@ class AdminProfileScreen extends StatelessWidget {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+
+                // Shop Name Field
+                const Text(
+                  'দোকানের নাম (Shop Name)',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: shopNameController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                    hintText: 'আপনার দোকানের নাম লিখুন',
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primaryColor, width: 1.5),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Action Buttons
@@ -564,10 +609,12 @@ class AdminProfileScreen extends StatelessWidget {
                           if (formKey.currentState!.validate()) {
                             final name = nameController.text.trim();
                             final email = emailController.text.trim();
+                            final shop = shopNameController.text.trim();
                             Get.back(); // Close bottom sheet first
                             await controller.updateProfile(
                               newName: name,
                               newEmail: email,
+                              newShopName: shop,
                             );
                           }
                         },

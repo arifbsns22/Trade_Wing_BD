@@ -22,6 +22,8 @@ import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/adm
 import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/admin_offer_creation_screens.dart';
 import 'package:trade_wign_bd/features/admin/drive_pack/presentation/screens/drive_order_request_screen.dart';
 import 'package:trade_wign_bd/features/admin/traning/presentation/screens/all_traning_screen.dart';
+import 'package:trade_wign_bd/features/admin/vendor/presentation/screens/admin_vendor_dashboard_screen.dart';
+import 'package:trade_wign_bd/features/admin/reselling/presentation/screens/admin_reseller_dashboard_screen.dart';
 
 class AdminAppbarDrawer extends StatelessWidget {
   const AdminAppbarDrawer({super.key});
@@ -484,6 +486,10 @@ class AdminAppbarDrawer extends StatelessWidget {
                         Get.offAll(() => const AdminDashboardScreen());
                       } else if (item['title'] == 'সেটিংস') {
                         Get.to(() => const AdminSettingsScreen());
+                      } else if (item['title'] == 'রিসেলিং') {
+                        Get.to(() => const AdminResellerDashboardScreen());
+                      } else if (item['title'] == 'ভেন্ডরশিপ') {
+                        Get.to(() => const AdminVendorDashboardScreen());
                       } else if (item['title'] == 'ট্রেনিং') {
                         Get.to(() => const AllTraningScreen());
                       } else if (item['title'] == 'বিজনেস ক্লাব') {

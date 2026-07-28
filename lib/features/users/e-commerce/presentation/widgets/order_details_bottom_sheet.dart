@@ -35,8 +35,12 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     super.initState();
     currentOrderStatus = widget.order.orderStatus;
     currentPaymentStatus = widget.order.paymentStatus;
-    final role = Get.find<AuthController>().currentUserRole.value;
-    isAdmin = role == 'Super Admin' || role == 'Admin';
+    final auth = Get.find<AuthController>();
+    final role = auth.currentUserRole.value.toLowerCase().trim();
+    final mobile = auth.currentUserMobile.value.trim();
+    final isReseller = role == 'reseller';
+    final isOrderOwner = widget.order.isResellerOrder == true && widget.order.resellerMobile == mobile;
+    isAdmin = role == 'super admin' || role == 'admin' || (isReseller && isOrderOwner);
   }
 
   Future<void> _updateOrderStatus(OrderStatus newStatus) async {

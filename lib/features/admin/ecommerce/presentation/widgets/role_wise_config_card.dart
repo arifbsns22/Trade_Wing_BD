@@ -18,10 +18,10 @@ class RoleWiseConfigCard extends StatefulWidget {
 }
 
 class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
-  // List of all 10 user roles matching UserRole enum display values
+  // List of user roles matching UserRole enum display values
   final List<Map<String, String>> rolesList = [
+    {'key': 'Vendor', 'name': 'ভেন্ডর (Vendor)'},
     {'key': 'Customer', 'name': 'গ্রাহক (Customer)'},
-    {'key': 'Guest Customer', 'name': 'অতিথি গ্রাহক (Guest)'},
     {'key': 'Brand Promoter', 'name': 'ব্র্যান্ড প্রমোটর (Brand Promoter)'},
     {'key': 'Sales Partner', 'name': 'সেলস পার্টনার (Sales Partner)'},
     {'key': 'Senior Sales Partner', 'name': 'সিনিয়র সেলস পার্টনার (Senior Partner)'},
@@ -90,7 +90,7 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
 
     // Role pricing rates: B2B discounts
     final Map<String, double> priceFactors = {
-      'Guest Customer': 1.0,
+      'Vendor': 0.85,               // Vendor rate (15% discount)
       'Customer': 1.0,
       'Brand Promoter': 0.95,       // 5% discount
       'Sales Partner': 0.90,        // 10% discount
@@ -102,14 +102,16 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
       'Super Admin': 0.60,          // 40% discount
     };
 
-    // Auto rewards logic: 1 reward point per 100 Taka of price
+    // Auto rewards logic: 1 reward point per 10 BDT of price
     setState(() {
       priceFactors.forEach((key, factor) {
-        final double calculatedPrice = customerPrice * factor;
-        _priceControllers[key]!.text = calculatedPrice.toStringAsFixed(0);
-        
-        final int calculatedPoints = (calculatedPrice / 10).round(); // 1 point per 10 BDT
-        _rewardControllers[key]!.text = calculatedPoints.toString();
+        if (_priceControllers.containsKey(key)) {
+          final double calculatedPrice = customerPrice * factor;
+          _priceControllers[key]!.text = calculatedPrice.toStringAsFixed(0);
+          
+          final int calculatedPoints = (calculatedPrice / 10).round();
+          _rewardControllers[key]!.text = calculatedPoints.toString();
+        }
       });
     });
 
@@ -181,16 +183,47 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
                   itemBuilder: (context, index) {
                     final role = rolesList[index];
                     final key = role['key']!;
-                    return Column(
+                    final isVendor = key == 'Vendor';
+
+                    final itemContent = Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          role['name']!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                if (isVendor) ...[
+                                  const Icon(Icons.storefront_rounded, size: 16, color: Color(0xFFD97706)),
+                                  const SizedBox(width: 6),
+                                ],
+                                Text(
+                                  role['name']!,
+                                  style: TextStyle(
+                                    fontSize: isVendor ? 13 : 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isVendor ? const Color(0xFF92400E) : Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (isVendor)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF59E0B),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  '★ Vendor Exclusive',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Row(
@@ -204,7 +237,13 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
                                   labelText: 'মূল্য (৳)',
                                   isDense: true,
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                  prefixIcon: const Icon(Icons.monetization_on_outlined, size: 16),
+                                  prefixIcon: Icon(
+                                    Icons.monetization_on_outlined,
+                                    size: 16,
+                                    color: isVendor ? const Color(0xFFD97706) : null,
+                                  ),
+                                  filled: isVendor,
+                                  fillColor: isVendor ? Colors.white : null,
                                 ),
                               ),
                             ),
@@ -218,7 +257,13 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
                                   labelText: 'রিওয়ার্ড পয়েন্ট',
                                   isDense: true,
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                  prefixIcon: const Icon(Icons.star_outline_rounded, size: 16),
+                                  prefixIcon: Icon(
+                                    Icons.star_outline_rounded,
+                                    size: 16,
+                                    color: isVendor ? const Color(0xFFD97706) : null,
+                                  ),
+                                  filled: isVendor,
+                                  fillColor: isVendor ? Colors.white : null,
                                 ),
                               ),
                             ),
@@ -226,6 +271,34 @@ class _RoleWiseConfigCardState extends State<RoleWiseConfigCard> {
                         ),
                       ],
                     );
+
+                    if (isVendor) {
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFFFEF3C7),
+                              const Color(0xFFFFFBEB),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFF59E0B), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: itemContent,
+                      );
+                    }
+
+                    return itemContent;
                   },
                 ),
               ],
