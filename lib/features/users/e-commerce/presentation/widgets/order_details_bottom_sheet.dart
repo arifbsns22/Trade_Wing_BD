@@ -38,9 +38,9 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     final auth = Get.find<AuthController>();
     final role = auth.currentUserRole.value.toLowerCase().trim();
     final mobile = auth.currentUserMobile.value.trim();
-    final isReseller = role == 'reseller';
+    final isVendor = role == 'vendor';
     final isOrderOwner = widget.order.isResellerOrder == true && widget.order.resellerMobile == mobile;
-    isAdmin = role == 'super admin' || role == 'admin' || (isReseller && isOrderOwner);
+    isAdmin = role == 'super admin' || role == 'admin' || (isVendor && isOrderOwner);
   }
 
   Future<void> _updateOrderStatus(OrderStatus newStatus) async {

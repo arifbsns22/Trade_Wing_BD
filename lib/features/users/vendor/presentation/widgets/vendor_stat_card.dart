@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ResellerStatCard extends StatelessWidget {
+class VendorStatCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
@@ -8,7 +8,7 @@ class ResellerStatCard extends StatelessWidget {
   final Color backgroundColor;
   final Color borderColor;
 
-  const ResellerStatCard({
+  const VendorStatCard({
     super.key,
     required this.title,
     required this.value,

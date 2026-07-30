@@ -3,14 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_model.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/widgets/order_details_bottom_sheet.dart';
 
-class ResellerOrderCard extends StatelessWidget {
+class VendorOrderCard extends StatelessWidget {
   final OrderModel order;
-  final double resellerEarnings;
+  final double vendorEarnings;
 
-  const ResellerOrderCard({
+  const VendorOrderCard({
     super.key,
     required this.order,
-    required this.resellerEarnings,
+    required this.vendorEarnings,
   });
 
   @override
@@ -137,7 +137,7 @@ class ResellerOrderCard extends StatelessWidget {
                   children: [
                     const Text('আপনার অর্জিত লাভ (কমিশন বাদে)', style: TextStyle(fontSize: 10, color: Colors.grey)),
                     Text(
-                      '৳${resellerEarnings.toStringAsFixed(2)}',
+                      '৳${vendorEarnings.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,

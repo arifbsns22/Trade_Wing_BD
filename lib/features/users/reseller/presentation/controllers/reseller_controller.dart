@@ -4,44 +4,52 @@ import 'package:get/get.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/features/admin/ecommerce/domain/models/product_model.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_model.dart';
-import 'package:trade_wign_bd/common/services/notification_helper.dart';
 
 class ResellerController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthController _authController = Get.find<AuthController>();
 
-  String get resellerMobile => _authController.currentUserMobile.value.trim();
-
-  // Loading states
+  // Reactive states
+  final RxList<Product> productsAvailable = <Product>[].obs;
+  final RxList<Map<String, dynamic>> basketItems = <Map<String, dynamic>>[].obs;
+  final RxList<OrderModel> resellerOrders = <OrderModel>[].obs;
+  final RxList<Map<String, dynamic>> withdrawals = <Map<String, dynamic>>[].obs;
+  
   final RxBool isLoadingProducts = false.obs;
+  final RxBool isLoadingBasket = false.obs;
   final RxBool isLoadingOrders = false.obs;
   final RxBool isLoadingWithdrawals = false.obs;
   final RxBool isSubmittingAction = false.obs;
 
-  // Reseller data lists
-  final RxList<Product> resellerProducts = <Product>[].obs;
-  final RxList<OrderModel> resellerOrders = <OrderModel>[].obs;
-  final RxList<Map<String, dynamic>> withdrawals = <Map<String, dynamic>>[].obs;
+  String get resellerMobile => _authController.currentUserMobile.value.trim();
 
-  // Dropdown configuration data lists
-  final RxList<Map<String, dynamic>> productTypes = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> units = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> categories = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> brands = <Map<String, dynamic>>[].obs;
+  // Dashboard Stats (Calculated reactive variables)
+  RxInt get availableProductsCount => productsAvailable.length.obs;
+  RxInt get basketCount => basketItems.length.obs;
+  
+  RxInt get pendingOrdersCount => 
+      resellerOrders.where((o) => o.orderStatus == OrderStatus.pending).length.obs;
+      
+  RxInt get completedOrdersCount => 
+      resellerOrders.where((o) => o.orderStatus == OrderStatus.delivered).length.obs;
 
-  // Earning / Finance states
-  final RxDouble reactiveTotalEarnings = 0.0.obs;
-  final RxDouble reactiveTotalSales = 0.0.obs;
+  RxDouble get totalProfit => () {
+    double profit = 0.0;
+    for (var doc in resellerOrders) {
+      if (doc.orderStatus == OrderStatus.delivered) {
+        // We will fetch the resellerProfit directly from order metadata if it exists
+        // Since OrderModel fromMap doesn't parse resellerProfit, we will query it dynamically below
+      }
+    }
+    return profit;
+  }().obs;
+
+  // Let's store raw profit calculation separately by parsing the snapshots
+  final RxDouble reactiveTotalProfit = 0.0.obs;
   final RxDouble reactiveTotalWithdrawn = 0.0.obs;
-
-  double get withdrawAvailableAmount =>
-      (reactiveTotalEarnings.value - reactiveTotalWithdrawn.value).clamp(0.0, 9999999.0);
-
-  // Stats counts
-  int get pendingOrdersCount =>
-      resellerOrders.where((o) => o.orderStatus == OrderStatus.pending).length;
-  int get completedOrdersCount =>
-      resellerOrders.where((o) => o.orderStatus == OrderStatus.delivered).length;
+  
+  RxDouble get withdrawAvailableAmount => 
+      (reactiveTotalProfit.value - reactiveTotalWithdrawn.value).clamp(0.0, 9999999.0).obs;
 
   @override
   void onInit() {
@@ -58,74 +66,97 @@ class ResellerController extends GetxController {
   }
 
   void setupListeners() {
-    listenToProducts();
+    listenToAvailableProducts();
+    listenToBasket();
     listenToOrders();
     listenToWithdrawals();
-    fetchConfigData();
   }
 
-  // 1. Stream reseller's own products
-  void listenToProducts() {
-    if (resellerMobile.isEmpty) return;
+  // 1. Stream Admin Products with Vendor pricing
+  void listenToAvailableProducts() {
     isLoadingProducts.value = true;
     _firestore
         .collection('products')
-        .where('isResellerProduct', isEqualTo: true)
-        .where('resellerMobile', isEqualTo: resellerMobile)
+        .where('status', isEqualTo: 'public')
         .snapshots()
         .listen((snapshot) {
-      resellerProducts.value = snapshot.docs.map((doc) {
-        return Product.fromFirestore(doc);
-      }).toList();
+      final List<Product> list = [];
+      for (var doc in snapshot.docs) {
+        final product = Product.fromFirestore(doc);
+        // Only include products with a valid vendor price > 0
+        final vendorPrice = product.rolePrices['Vendor'];
+        if (vendorPrice != null && vendorPrice > 0) {
+          list.add(product);
+        }
+      }
+      productsAvailable.value = list;
       isLoadingProducts.value = false;
     }, onError: (e) {
-      debugPrint('Error loading reseller products: $e');
+      debugPrint('Error loading vendor products: $e');
       isLoadingProducts.value = false;
     });
   }
 
-  // 2. Stream reseller orders & calculate earnings in real-time
+  // 2. Stream Vendor Basket items
+  void listenToBasket() {
+    if (resellerMobile.isEmpty) return;
+    isLoadingBasket.value = true;
+    _firestore
+        .collection('users')
+        .doc(resellerMobile)
+        .collection('vendor_basket')
+        .snapshots()
+        .listen((snapshot) {
+      basketItems.value = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+      isLoadingBasket.value = false;
+    }, onError: (e) {
+      debugPrint('Error loading basket items: $e');
+      isLoadingBasket.value = false;
+    });
+  }
+
+  // 3. Stream Vendor Orders & Calculate Profit in real-time
   void listenToOrders() {
     if (resellerMobile.isEmpty) return;
     isLoadingOrders.value = true;
     _firestore
         .collection('orders')
-        .where('isResellerOrder', isEqualTo: true)
-        .where('resellerMobile', isEqualTo: resellerMobile)
+        .where('vendorMobile', isEqualTo: resellerMobile)
         .snapshots()
         .listen((snapshot) {
       resellerOrders.value = snapshot.docs.map((doc) {
         return OrderModel.fromMap(doc.data(), doc.id);
       }).toList();
 
-      double salesSum = 0.0;
-      double earningsSum = 0.0;
+      // Calculate profit dynamically from order snapshots
+      double profitSum = 0.0;
       for (var doc in snapshot.docs) {
         final data = doc.data();
         final status = data['orderStatus'] as String?;
         if (status == 'delivered') {
-          final double totalAmount = (data['totalAmount'] ?? 0.0).toDouble();
-          final double earnings = (data['resellerEarnings'] ?? 0.0).toDouble();
-          salesSum += totalAmount;
-          earningsSum += earnings;
+          final profit = (data['vendorProfit'] as num?)?.toDouble() ?? 0.0;
+          profitSum += profit;
         }
       }
-      reactiveTotalSales.value = salesSum;
-      reactiveTotalEarnings.value = earningsSum;
+      reactiveTotalProfit.value = profitSum;
       isLoadingOrders.value = false;
     }, onError: (e) {
-      debugPrint('Error loading reseller orders: $e');
+      debugPrint('Error loading vendor orders: $e');
       isLoadingOrders.value = false;
     });
   }
 
-  // 3. Stream withdrawals
+  // 4. Stream Withdrawals
   void listenToWithdrawals() {
     if (resellerMobile.isEmpty) return;
     isLoadingWithdrawals.value = true;
     _firestore
         .collection('withdrawals')
-        .where('resellerMobile', isEqualTo: resellerMobile)
+        .where('vendorMobile', isEqualTo: resellerMobile)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
@@ -135,6 +166,7 @@ class ResellerController extends GetxController {
         return data;
       }).toList();
 
+      // Calculate total approved withdrawals
       double withdrawnSum = 0.0;
       for (var doc in snapshot.docs) {
         final data = doc.data();
@@ -152,68 +184,191 @@ class ResellerController extends GetxController {
     });
   }
 
-  // 4. Load dynamic categories/brands/units/types from Firestore config
-  void fetchConfigData() {
-    // Categories
-    _firestore.collection('categories').orderBy('name').snapshots().listen((snapshot) {
-      categories.value = snapshot.docs.map((doc) => {
-        'id': doc.id,
-        'name': doc.data()['name'] ?? '',
-      }).toList();
-    });
-
-    // Brands
-    _firestore.collection('brands').orderBy('name').snapshots().listen((snapshot) {
-      brands.value = snapshot.docs.map((doc) => {
-        'id': doc.id,
-        'name': doc.data()['name'] ?? '',
-      }).toList();
-    });
-
-    // Product Types
-    _firestore.collection('product_types').orderBy('name').snapshots().listen((snapshot) {
-      productTypes.value = snapshot.docs.map((doc) => {
-        'id': doc.id,
-        'name': doc.data()['name'] ?? '',
-      }).toList();
-    });
-
-    // Units
-    _firestore.collection('units').orderBy('name').snapshots().listen((snapshot) {
-      units.value = snapshot.docs.map((doc) => {
-        'id': doc.id,
-        'name': doc.data()['name'] ?? '',
-      }).toList();
-    });
-  }
-
-  // Reseller Product Operations
-  Future<bool> addResellerProduct(Product product) async {
+  // Helper to publish vendor product globally
+  Future<void> _publishToGlobalProducts(String productId, double customPrice) async {
     try {
-      isSubmittingAction.value = true;
+      final doc = await _firestore.collection('products').doc(productId).get();
+      if (!doc.exists) return;
+      final originalProduct = Product.fromFirestore(doc);
+      
+      final vendorPrice = originalProduct.rolePrices['Vendor'] ?? 0.0;
+      final customProductId = 'vendor_${resellerMobile}_$productId';
 
-      // Get shop name
+      // Get vendor's shop name
       final userDoc = await _firestore.collection('users').doc(resellerMobile).get();
       String shopNameVal = '';
-      if (userDoc.exists) {
-        final userData = userDoc.data();
-        if (userData != null) {
-          shopNameVal = userData['shopName'] ?? '';
-        }
+      if (userDoc.exists && userDoc.data() != null) {
+        shopNameVal = (userDoc.data()!['shopName'] as String?) ?? '';
+      }
+      
+      await _firestore.collection('products').doc(customProductId).set({
+        'name': originalProduct.name,
+        'type': originalProduct.type,
+        'brand': originalProduct.brand,
+        'category': originalProduct.category,
+        'image': originalProduct.image,
+        'description': originalProduct.description,
+        'stock': originalProduct.stock,
+        'regularPrice': customPrice,
+        'discount': 0.0,
+        'discountType': 'fixed',
+        'vat': originalProduct.vat,
+        'extraExpenses': originalProduct.extraExpenses,
+        'unit': originalProduct.unit,
+        'sizes': originalProduct.sizes,
+        'variants': originalProduct.variants,
+        'status': 'public',
+        'rolePrices': {
+          'Customer': customPrice,
+        },
+        'roleRewards': originalProduct.roleRewards,
+        'createdAt': FieldValue.serverTimestamp(),
+        'shopName': shopNameVal.isNotEmpty ? shopNameVal : 'Trade Wing BD',
+        
+        // Metadata fields
+        'isVendorProduct': true,
+        'vendorMobile': resellerMobile,
+        'originalProductId': productId,
+        'vendorPrice': vendorPrice,
+      });
+      debugPrint('Published vendor product globally: $customProductId');
+    } catch (e) {
+      debugPrint('Error publishing vendor product: $e');
+    }
+  }
+
+  // Helper to unpublish vendor product globally
+  Future<void> _unpublishFromGlobalProducts(String productId) async {
+    try {
+      final customProductId = 'vendor_${resellerMobile}_$productId';
+      await _firestore.collection('products').doc(customProductId).delete();
+      debugPrint('Unpublished vendor product globally: $customProductId');
+    } catch (e) {
+      debugPrint('Error unpublishing vendor product: $e');
+    }
+  }
+
+  // Basket Actions
+  Future<void> addToBasket(Product product) async {
+    if (resellerMobile.isEmpty) return;
+    try {
+      isSubmittingAction.value = true;
+      final vendorPrice = product.rolePrices['Vendor'] ?? 0.0;
+      final adminSellingPrice = product.rolePrices['Customer'] ?? product.regularPrice;
+
+      await _firestore
+          .collection('users')
+          .doc(resellerMobile)
+          .collection('vendor_basket')
+          .doc(product.id)
+          .set({
+        'productId': product.id,
+        'name': product.name,
+        'image': product.image,
+        'vendorPrice': vendorPrice,
+        'adminSellingPrice': adminSellingPrice,
+        'mySellingPrice': adminSellingPrice, // Initial custom price is admin final price
+        'addedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Publish to global products at the default price
+      await _publishToGlobalProducts(product.id!, adminSellingPrice);
+
+      Get.snackbar(
+        'সফলতা',
+        'পণ্যটি আপনার বাসকেটে যোগ করা হয়েছে',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar('ত্রুটি', 'বাসকেটে যোগ করতে ব্যর্থ হয়েছে: $e');
+    } finally {
+      isSubmittingAction.value = false;
+    }
+  }
+
+  Future<void> removeFromBasket(String productId) async {
+    if (resellerMobile.isEmpty) return;
+    try {
+      isSubmittingAction.value = true;
+      await _firestore
+          .collection('users')
+          .doc(resellerMobile)
+          .collection('vendor_basket')
+          .doc(productId)
+          .delete();
+
+      // Unpublish from global products
+      await _unpublishFromGlobalProducts(productId);
+
+      Get.snackbar(
+        'সফলতা',
+        'পণ্যটি বাসকেট থেকে সরানো হয়েছে',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar('ত্রুটি', 'পণ্য সরাতে ব্যর্থ হয়েছে: $e');
+    } finally {
+      isSubmittingAction.value = false;
+    }
+  }
+
+  Future<void> updateCustomPrice(String productId, double customPrice) async {
+    if (resellerMobile.isEmpty) return;
+    try {
+      isSubmittingAction.value = true;
+
+      // Get the wholesale vendor price to validate
+      final basketDoc = await _firestore
+          .collection('users')
+          .doc(resellerMobile)
+          .collection('vendor_basket')
+          .doc(productId)
+          .get();
+      
+      double vendorPrice = 0.0;
+      if (basketDoc.exists) {
+        vendorPrice = (basketDoc.data()?['vendorPrice'] as num?)?.toDouble() ?? 0.0;
+      }
+      
+      if (customPrice <= vendorPrice) {
+        Get.snackbar(
+          'ত্রুটি',
+          'বিক্রয় মূল্য ভেন্ডর কেনা মূল্য (৳${vendorPrice.toStringAsFixed(2)}) এর চেয়ে বেশি হতে হবে।',
+          backgroundColor: Colors.white.withValues(alpha: 0.9),
+          colorText: Colors.redAccent,
+          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+          borderWidth: 1,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
       }
 
-      final Map<String, dynamic> data = product.toFirestore();
-      data['shopName'] = shopNameVal.isNotEmpty ? shopNameVal : 'Reseller Shop';
-      data['isResellerProduct'] = true;
-      data['resellerMobile'] = resellerMobile;
-      data['status'] = 'public';
+      await _firestore
+          .collection('users')
+          .doc(resellerMobile)
+          .collection('vendor_basket')
+          .doc(productId)
+          .update({
+        'mySellingPrice': customPrice,
+      });
 
-      final customProductId = 'reseller_${resellerMobile}_${DateTime.now().millisecondsSinceEpoch}';
-      await _firestore.collection('products').doc(customProductId).set(data);
+      // Update in global products
+      await _publishToGlobalProducts(productId, customPrice);
 
       Get.snackbar(
         'সফলতা',
-        'পণ্যটি সফলভাবে যুক্ত করা হয়েছে',
+        'বিক্রয় মূল্য আপডেট করা হয়েছে',
         backgroundColor: Colors.white.withValues(alpha: 0.9),
         colorText: Colors.black87,
         borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
@@ -221,89 +376,8 @@ class ResellerController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
       );
-      return true;
     } catch (e) {
-      debugPrint('Error adding reseller product: $e');
-      Get.snackbar('ত্রুটি', 'পণ্য যুক্ত করা যায়নি: $e');
-      return false;
-    } finally {
-      isSubmittingAction.value = false;
-    }
-  }
-
-  Future<bool> updateResellerProduct(String productId, Product product) async {
-    try {
-      isSubmittingAction.value = true;
-
-      final Map<String, dynamic> data = product.toFirestore();
-      data['isResellerProduct'] = true;
-      data['resellerMobile'] = resellerMobile;
-
-      await _firestore.collection('products').doc(productId).update(data);
-
-      Get.snackbar(
-        'সফলতা',
-        'পণ্যের তথ্য সফলভাবে আপডেট করা হয়েছে',
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        colorText: Colors.black87,
-        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-        borderWidth: 1,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-      return true;
-    } catch (e) {
-      debugPrint('Error updating reseller product: $e');
-      Get.snackbar('ত্রুটি', 'পণ্য আপডেট করা যায়নি: $e');
-      return false;
-    } finally {
-      isSubmittingAction.value = false;
-    }
-  }
-
-  Future<bool> deleteResellerProduct(String productId) async {
-    try {
-      isSubmittingAction.value = true;
-      await _firestore.collection('products').doc(productId).delete();
-      Get.snackbar(
-        'সফলতা',
-        'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে',
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        colorText: Colors.black87,
-        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-        borderWidth: 1,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-      return true;
-    } catch (e) {
-      debugPrint('Error deleting reseller product: $e');
-      Get.snackbar('ত্রুটি', 'পণ্য মুছে ফেলা যায়নি: $e');
-      return false;
-    } finally {
-      isSubmittingAction.value = false;
-    }
-  }
-
-  Future<bool> toggleResellerProductStatus(String productId, String currentStatus) async {
-    try {
-      isSubmittingAction.value = true;
-      final newStatus = currentStatus == 'public' ? 'draft' : 'public';
-      await _firestore.collection('products').doc(productId).update({'status': newStatus});
-      Get.snackbar(
-        'সফলতা',
-        'পণ্যের অবস্হা পরিবর্তন করা হয়েছে',
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        colorText: Colors.black87,
-        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-        borderWidth: 1,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-      return true;
-    } catch (e) {
-      debugPrint('Error toggling reseller product status: $e');
-      return false;
+      Get.snackbar('ত্রুটি', 'বিক্রয় মূল্য আপডেট করতে ব্যর্থ হয়েছে: $e');
     } finally {
       isSubmittingAction.value = false;
     }
@@ -317,22 +391,31 @@ class ResellerController extends GetxController {
     required double amount,
   }) async {
     if (resellerMobile.isEmpty) return false;
+    if (amount > withdrawAvailableAmount.value) {
+      Get.snackbar(
+        'ত্রুটি',
+        'পর্যাপ্ত ব্যালেন্স নেই। সর্বোচ্চ উত্তোলনযোগ্য: ৳${withdrawAvailableAmount.value.toStringAsFixed(2)}',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.redAccent,
+        borderColor: Colors.redAccent.withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return false;
+    }
+
     try {
       isSubmittingAction.value = true;
-
-      if (amount > withdrawAvailableAmount) {
-        Get.snackbar('ত্রুটি', 'আপনার একাউন্টে পর্যাপ্ত ব্যালেন্স নেই।');
-        return false;
-      }
-
       await _firestore.collection('withdrawals').add({
-        'resellerMobile': resellerMobile,
+        'vendorMobile': resellerMobile,
+        'vendorName': _authController.currentUserName.value,
         'accountName': accountName,
         'accountNumber': accountNumber,
         'bankName': bankName,
         'amount': amount,
-        'status': 'pending', // pending | approved | rejected
-        'userRole': 'reseller',
+        'status': 'pending', // 'pending' | 'approved' | 'rejected'
+        'userRole': _authController.currentUserRole.value.toLowerCase().trim(),
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -348,40 +431,115 @@ class ResellerController extends GetxController {
       );
       return true;
     } catch (e) {
-      Get.snackbar('ত্রুটি', 'অনুরোধ সম্পন্ন করতে ব্যর্থ হয়েছে: $e');
+      Get.snackbar('ত্রুটি', 'অনুরোধ পাঠাতে ব্যর্থ হয়েছে: $e');
       return false;
     } finally {
       isSubmittingAction.value = false;
     }
   }
 
-  // Update order statuses
-  Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
+  // Place Vendor Order
+  Future<bool> placeVendorOrder({
+    required String customerName,
+    required String customerPhone,
+    required String customerAddress,
+    required String paymentMethod,
+    String? trxId,
+    String? senderPhone,
+    required Map<String, dynamic> basketItem,
+    required int quantity,
+  }) async {
+    if (resellerMobile.isEmpty) return false;
     try {
-      await _firestore.collection('orders').doc(orderId).update({'orderStatus': newStatus.name});
+      isSubmittingAction.value = true;
 
-      // Send notification to customer
-      final orderDoc = await _firestore.collection('orders').doc(orderId).get();
-      final customerMobile = orderDoc.data()?['userMobile'] as String?;
-      if (customerMobile != null) {
-        await NotificationHelper.sendNotification(
-          title: 'অর্ডার স্ট্যাটাস আপডেট! 📦',
-          body: 'আপনার রিসেলার অর্ডার #${orderId} এর বর্তমান অবস্থা: ${newStatus.name}',
-          type: 'status_updated',
-          userMobile: customerMobile,
-          isAdmin: false,
-        );
+      final String productId = basketItem['productId'];
+      final double mySellingPrice = (basketItem['mySellingPrice'] as num).toDouble();
+      final double vendorPrice = (basketItem['vendorPrice'] as num).toDouble();
+      final double profitPerUnit = mySellingPrice - vendorPrice;
+      final double totalOrderAmount = mySellingPrice * quantity;
+      final double totalVendorProfit = profitPerUnit * quantity;
+
+      // 1. Validate Product Stock from db
+      final productDoc = await _firestore.collection('products').doc(productId).get();
+      if (!productDoc.exists) {
+        Get.snackbar('ত্রুটি', 'পণ্যটি খুঁজে পাওয়া যায়নি');
+        return false;
       }
-    } catch (e) {
-      debugPrint('Error updating reseller order status: $e');
-    }
-  }
+      final productData = Product.fromFirestore(productDoc);
+      if (productData.stock < quantity) {
+        Get.snackbar('ত্রুটি', 'পর্যাপ্ত স্টক নেই। উপলব্ধ স্টক: ${productData.stock}');
+        return false;
+      }
 
-  Future<void> updatePaymentStatus(String orderId, PaymentStatus newStatus) async {
-    try {
-      await _firestore.collection('orders').doc(orderId).update({'paymentStatus': newStatus.name});
+      // 2. Prepare order doc
+      final orderId = 'ORD-${DateTime.now().millisecondsSinceEpoch}';
+      
+      final orderItems = [
+        {
+          'productId': productId,
+          'productName': basketItem['name'],
+          'quantity': quantity,
+          'price': mySellingPrice,
+          'image': basketItem['image'],
+          'unit': productData.unit,
+        }
+      ];
+
+      final Map<String, dynamic> orderData = {
+        'orderId': orderId,
+        'userMobile': customerPhone,
+        'userName': customerName,
+        'address': customerAddress,
+        'items': orderItems,
+        'totalAmount': totalOrderAmount,
+        'rewardPointsEarned': 0,
+        'paymentMethod': paymentMethod,
+        'offlineGateway': paymentMethod == 'offline' ? 'Bkash/Nagad' : null,
+        'offlineTrxId': trxId,
+        'offlineSenderMobile': senderPhone,
+        'orderStatus': 'pending',
+        'paymentStatus': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+        
+        // Vendor exclusive fields
+        'vendorMobile': resellerMobile,
+        'vendorProfit': totalVendorProfit,
+        'vendorPurchasePrice': vendorPrice * quantity,
+        'isVendorOrder': true,
+      };
+
+      final batch = _firestore.batch();
+      
+      // Save order
+      final orderRef = _firestore.collection('orders').doc(orderId);
+      batch.set(orderRef, orderData);
+
+      // Decrement stock
+      final productRef = _firestore.collection('products').doc(productId);
+      batch.update(productRef, {
+        'stock': FieldValue.increment(-quantity),
+      });
+
+      await batch.commit();
+
+      Get.snackbar(
+        'সফলতা',
+        'অর্ডারটি সফলভাবে সম্পন্ন হয়েছে। অর্ডার আইডি: $orderId',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+
+      return true;
     } catch (e) {
-      debugPrint('Error updating reseller payment status: $e');
+      Get.snackbar('ত্রুটি', 'অর্ডার করতে ব্যর্থ হয়েছে: $e');
+      return false;
+    } finally {
+      isSubmittingAction.value = false;
     }
   }
 }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:trade_wign_bd/features/admin/ecommerce/domain/models/product_model.dart';
 
-class ResellerProductCard extends StatelessWidget {
+class VendorProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggleStatus;
 
-  const ResellerProductCard({
+  const VendorProductCard({
     super.key,
     required this.product,
     required this.onEdit,

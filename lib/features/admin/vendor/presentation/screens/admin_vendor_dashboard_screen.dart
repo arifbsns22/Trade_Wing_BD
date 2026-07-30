@@ -87,12 +87,20 @@ class AdminVendorDashboardScreen extends StatelessWidget {
                             themeColor: const Color(0xFF006064),
                           ),
                           AdminVendorStatCard(
-                            title: 'মোট অর্জিত লাভ',
+                            title: 'ভেন্ডর অর্জিত লাভ',
                             value: '৳${controller.totalActualProfit.value.toStringAsFixed(2)}',
                             icon: Icons.monetization_on_outlined,
                             backgroundColor: const Color(0xFFE0F2FE),
                             borderColor: const Color(0xFFBAE6FD),
                             themeColor: const Color(0xFF0369A1),
+                          ),
+                          AdminVendorStatCard(
+                            title: 'অ্যাডমিন কমিশন',
+                            value: '৳${controller.totalAdminCommission.value.toStringAsFixed(2)}',
+                            icon: Icons.percent_rounded,
+                            backgroundColor: const Color(0xFFECEFF1),
+                            borderColor: const Color(0xFFCFD8DC),
+                            themeColor: const Color(0xFF37474F),
                           ),
                           AdminVendorStatCard(
                             title: 'মোট উত্তোলন',
@@ -119,7 +127,7 @@ class AdminVendorDashboardScreen extends StatelessWidget {
 
                 // Section Title
                 const Text(
-                  'ভেন্ডর তালিকা',
+                  'রিসেলার তালিকা',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 12),

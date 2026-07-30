@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:trade_wign_bd/features/users/reseller/presentation/controllers/reseller_controller.dart';
-import 'package:trade_wign_bd/features/users/reseller/presentation/widgets/reseller_stat_card.dart';
-import 'package:trade_wign_bd/features/users/reseller/presentation/widgets/reseller_order_card.dart';
-import 'package:trade_wign_bd/features/users/reseller/presentation/widgets/reseller_product_card.dart';
-import 'package:trade_wign_bd/features/users/reseller/presentation/screens/reseller_add_product_screen.dart';
+import 'package:trade_wign_bd/features/users/reseller/presentation/widgets/reseller_widgets.dart';
+import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 class ResellerDashboardScreen extends StatefulWidget {
   const ResellerDashboardScreen({super.key});
@@ -17,7 +13,7 @@ class ResellerDashboardScreen extends StatefulWidget {
 
 class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
   final ResellerController controller = Get.put(ResellerController());
-  int _activeTabIndex = 0; // 0: Overview, 1: Products, 2: Orders
+  int _activeTabIndex = 0; // 0: Market, 1: Basket, 2: Orders, 3: Withdrawals
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +51,14 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Stats Grid
+                // 1. Stats Header Grid (Responsive layout)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isWide = constraints.maxWidth > 600;
@@ -69,55 +68,61 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: isWide ? 2.0 : 2.3,
+                      childAspectRatio: isWide ? 2.0 : 2.1,
                       children: [
                         ResellerStatCard(
-                          title: 'আমার পণ্য',
-                          value: '${controller.resellerProducts.length} টি',
-                          icon: Icons.inventory_2_outlined,
-                          backgroundColor: const Color(0xFFE0F2FE),
-                          borderColor: const Color(0xFFBAE6FD),
-                          themeColor: const Color(0xFF0369A1),
+                          title: 'বিক্রির যোগ্য পণ্য',
+                          value: '${controller.availableProductsCount.value} টি',
+                          subtitle: 'উপলব্ধ পণ্য',
+                          icon: Icons.storefront_outlined,
+                          backgroundColor: const Color(0xFFFFF3E0),
+                          borderColor: const Color(0xFFFFE0B2),
+                          themeColor: const Color(0xFFE65100),
+                        ),
+                        ResellerStatCard(
+                          title: 'বাসকেটের পণ্য',
+                          value: '${controller.basketCount.value} টি',
+                          subtitle: 'আমার বাসকেট',
+                          icon: Icons.shopping_basket_outlined,
+                          backgroundColor: const Color(0xFFE0F7FA),
+                          borderColor: const Color(0xFFB2EBF2),
+                          themeColor: const Color(0xFF00796B),
                         ),
                         ResellerStatCard(
                           title: 'পেন্ডিং অর্ডার',
-                          value: '${controller.pendingOrdersCount} টি',
-                          icon: Icons.pending_outlined,
-                          backgroundColor: const Color(0xFFFEF3C7),
-                          borderColor: const Color(0xFFFDE68A),
-                          themeColor: const Color(0xFFB45309),
+                          value: '${controller.pendingOrdersCount.value} টি',
+                          subtitle: 'অপেক্ষমাণ কাস্টমার অর্ডার',
+                          icon: Icons.pending_actions_outlined,
+                          backgroundColor: const Color(0xFFF3E5F5),
+                          borderColor: const Color(0xFFE1BEE7),
+                          themeColor: const Color(0xFF6A1B9A),
                         ),
                         ResellerStatCard(
                           title: 'সম্পন্ন অর্ডার',
-                          value: '${controller.completedOrdersCount} টি',
-                          icon: Icons.check_circle_outline_rounded,
-                          backgroundColor: const Color(0xFFDCFCE7),
-                          borderColor: const Color(0xFFBBF7D0),
-                          themeColor: const Color(0xFF15803D),
+                          value: '${controller.completedOrdersCount.value} টি',
+                          subtitle: 'সফলভাবে ডেলিভারড',
+                          icon: Icons.done_all_outlined,
+                          backgroundColor: const Color(0xFFE8F5E9),
+                          borderColor: const Color(0xFFC8E6C9),
+                          themeColor: const Color(0xFF2E7D32),
                         ),
                         ResellerStatCard(
-                          title: 'মোট বিক্রয়',
-                          value: '৳${controller.reactiveTotalSales.value.toStringAsFixed(2)}',
-                          icon: Icons.trending_up_rounded,
-                          backgroundColor: const Color(0xFFF3E8FF),
-                          borderColor: const Color(0xFFE9D5FF),
-                          themeColor: const Color(0xFF6B21A8),
-                        ),
-                        ResellerStatCard(
-                          title: 'অর্জিত লাভ',
-                          value: '৳${controller.reactiveTotalEarnings.value.toStringAsFixed(2)}',
+                          title: 'মোট অর্জিত লাভ',
+                          value: '৳${controller.reactiveTotalProfit.value.toStringAsFixed(2)}',
+                          subtitle: 'মোট অর্জিত লাভ',
                           icon: Icons.monetization_on_outlined,
-                          backgroundColor: const Color(0xFFFEE2E2),
-                          borderColor: const Color(0xFFFECACA),
-                          themeColor: const Color(0xFFB91C1C),
+                          backgroundColor: const Color(0xFFE8EAF6),
+                          borderColor: const Color(0xFFC5CAE9),
+                          themeColor: const Color(0xFF283593),
                         ),
                         ResellerStatCard(
                           title: 'উত্তোলনযোগ্য ব্যালেন্স',
-                          value: '৳${controller.withdrawAvailableAmount.toStringAsFixed(2)}',
+                          value: '৳${controller.withdrawAvailableAmount.value.toStringAsFixed(2)}',
+                          subtitle: 'উত্তোলনযোগ্য রিসেলার ব্যালেন্স',
                           icon: Icons.account_balance_wallet_outlined,
-                          backgroundColor: const Color(0xFFECFDF5),
-                          borderColor: const Color(0xFFA7F3D0),
-                          themeColor: const Color(0xFF047857),
+                          backgroundColor: const Color(0xFFFCE4EC),
+                          borderColor: const Color(0xFFF8BBD0),
+                          themeColor: const Color(0xFFC2185B),
                         ),
                       ],
                     );
@@ -125,25 +130,41 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 2. Tab Bar
+                // 2. Custom Styled Tab Switcher
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE2E8F0),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(child: _buildTabButton(0, 'সারসংক্ষেপ / উত্তোলন', Icons.analytics_outlined)),
-                      Expanded(child: _buildTabButton(1, 'আমার পণ্যসমূহ', Icons.inventory_2_outlined)),
-                      Expanded(child: _buildTabButton(2, 'অর্ডারসমূহ', Icons.receipt_long_outlined)),
-                    ],
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildTabButton(0, 'পণ্য মার্কেট', Icons.store_rounded),
+                        _buildTabButton(
+                          1,
+                          'আমার বাসকেট',
+                          Icons.shopping_bag_rounded,
+                        ),
+                        _buildTabButton(
+                          2,
+                          'আমার অর্ডারসমূহ',
+                          Icons.receipt_long_rounded,
+                        ),
+                        _buildTabButton(
+                          3,
+                          'উত্তোলন / লাভ',
+                          Icons.monetization_on_rounded,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
-                // 3. Tab Body
-                _buildTabContent(),
+                // 3. Tab Contents
+                _buildActiveTabContent(),
               ],
             ),
           ),
@@ -162,7 +183,7 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
@@ -177,16 +198,20 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
               : null,
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? const Color(0xFF08B3AC) : Colors.black54, size: 16),
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? AppColors.primaryColor : Colors.black54,
+            ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.black87 : Colors.black54,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? AppColors.primaryColor : Colors.black54,
               ),
             ),
           ],
@@ -195,24 +220,128 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
     );
   }
 
-  Widget _buildTabContent() {
+  Widget _buildActiveTabContent() {
     switch (_activeTabIndex) {
       case 0:
-        return _buildOverviewTab();
+        return _buildMarketTab();
       case 1:
-        return _buildProductsTab();
+        return _buildBasketTab();
       case 2:
         return _buildOrdersTab();
+      case 3:
+        return _buildWithdrawalsTab();
       default:
-        return const SizedBox.shrink();
+        return const SizedBox();
     }
   }
 
-  Widget _buildOverviewTab() {
+  // MARK: - Tab Views
+
+  Widget _buildMarketTab() {
+    if (controller.isLoadingProducts.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (controller.productsAvailable.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: Text('এই মুহূর্তে রিসেলার মূল্যের কোনো পণ্য উপলব্ধ নেই।'),
+        ),
+      );
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: controller.productsAvailable.length,
+      itemBuilder: (context, index) {
+        final product = controller.productsAvailable[index];
+        final isAdded = controller.basketItems.any(
+          (item) => item['productId'] == product.id,
+        );
+
+        return MarketProductCard(
+          product: product,
+          isAdded: isAdded,
+          onAddTap: () => controller.addToBasket(product),
+          onRemoveTap: () => controller.removeFromBasket(product.id!),
+        );
+      },
+    );
+  }
+
+  Widget _buildBasketTab() {
+    if (controller.isLoadingBasket.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (controller.basketItems.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: Text('আপনার বাসকেট খালি। পণ্য মার্কেট থেকে পণ্য যোগ করুন।'),
+        ),
+      );
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: controller.basketItems.length,
+      itemBuilder: (context, index) {
+        final item = controller.basketItems[index];
+        return BasketItemCard(
+          item: item,
+          onRemoveTap: () => controller.removeFromBasket(item['productId']),
+          onUpdatePrice: (newPrice) =>
+              controller.updateCustomPrice(item['productId'], newPrice),
+        );
+      },
+    );
+  }
+
+  Widget _buildOrdersTab() {
+    if (controller.isLoadingOrders.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (controller.resellerOrders.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: Text('আপনার কোনো বিক্রয়কৃত অর্ডার নেই।'),
+        ),
+      );
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: controller.resellerOrders.length,
+      itemBuilder: (context, index) {
+        final order = controller.resellerOrders[index];
+
+        // Calculate profit dynamically from the items
+        double profit = 0.0;
+        for (var item in order.items) {
+          final double customPrice = (item['price'] as num?)?.toDouble() ?? 0.0;
+          final double vendorPrice =
+              (item['vendorPrice'] as num?)?.toDouble() ?? 0.0;
+          final int qty = (item['quantity'] as num?)?.toInt() ?? 1;
+
+          if (vendorPrice > 0) {
+            profit += (customPrice - vendorPrice) * qty;
+          } else {
+            // fallback cost margin
+            profit += (customPrice * 0.15) * qty;
+          }
+        }
+
+        return ResellerOrderCard(order: order, resellerProfit: profit);
+      },
+    );
+  }
+
+  Widget _buildWithdrawalsTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Withdrawal request form / button card
+        // Profit summary & Request button
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -221,48 +350,67 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
             border: Border.all(color: const Color(0xFFF1F5F9)),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'ব্যালেন্স উত্তোলন করুন',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'উত্তোলনযোগ্য ব্যালেন্স',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  Text(
+                    '৳${controller.withdrawAvailableAmount.value.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                'আপনার বর্তমান উত্তোলনযোগ্য ব্যালেন্স: ৳${controller.withdrawAvailableAmount.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 13, color: Colors.black54),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF08B3AC),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 44),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
+              const Divider(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  icon: const Icon(Icons.outbox_rounded),
+                  label: const Text(
+                    'উত্তোলনের অনুরোধ পাঠান',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: controller.withdrawAvailableAmount.value > 0
+                      ? () => _showWithdrawalRequestDialog(context)
+                      : null,
                 ),
-                icon: const Icon(Icons.account_balance_rounded, size: 18),
-                label: const Text('উত্তোলন অনুরোধ পাঠান', style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () => _showWithdrawalSheet(context),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
-
-        // Recent withdrawals list
+        const SizedBox(height: 24),
         const Text(
-          'উত্তোলন হিস্ট্রি',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
+          'উত্তোলন ইতিহাস',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: Colors.black87,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+
         if (controller.isLoadingWithdrawals.value)
           const Center(child: CircularProgressIndicator())
         else if (controller.withdrawals.isEmpty)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(32.0),
-              child: Text('কোনো উত্তোলনের রেকর্ড পাওয়া যায়নি।'),
+              padding: EdgeInsets.symmetric(vertical: 30.0),
+              child: Text('আপনার কোনো পূর্ববর্তী উত্তোলন রেকর্ড নেই।'),
             ),
           )
         else
@@ -272,203 +420,65 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
             itemCount: controller.withdrawals.length,
             itemBuilder: (context, index) {
               final w = controller.withdrawals[index];
-              final amt = (w['amount'] as num?)?.toDouble() ?? 0.0;
-              final status = w['status'] ?? 'pending';
-              final DateTime date = (w['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
-
-              Color statusColor;
-              String statusBangla;
-              switch (status) {
-                case 'approved':
-                  statusColor = Colors.green;
-                  statusBangla = 'অনুমোদিত';
-                  break;
-                case 'rejected':
-                  statusColor = Colors.red;
-                  statusBangla = 'প্রত্যাখ্যাত';
-                  break;
-                case 'pending':
-                default:
-                  statusColor = Colors.orange;
-                  statusBangla = 'অপেক্ষমাণ';
-                  break;
-              }
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('৳${amt.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${w['bankName']} (${w['accountNumber']})',
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                        Text(
-                          DateFormat('dd MMM yyyy, hh:mm a').format(date),
-                          style: const TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        statusBangla,
-                        style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return WithdrawalCard(w: w);
             },
           ),
       ],
     );
   }
 
-  Widget _buildProductsTab() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'আমার পণ্য তালিকা',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF08B3AC),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              icon: const Icon(Icons.add_rounded, size: 16),
-              label: const Text('নতুন পণ্য', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Get.to(() => const ResellerAddProductScreen());
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (controller.isLoadingProducts.value)
-          const Center(child: CircularProgressIndicator())
-        else if (controller.resellerProducts.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 48.0),
-              child: Text('আপনার কোনো পণ্য নেই। নতুন পণ্য যুক্ত করুন।'),
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.resellerProducts.length,
-            itemBuilder: (context, index) {
-              final product = controller.resellerProducts[index];
-              return ResellerProductCard(
-                product: product,
-                onEdit: () {
-                  Get.to(() => ResellerAddProductScreen(product: product));
-                },
-                onDelete: () {
-                  _showDeleteConfirmDialog(context, product.id!);
-                },
-                onToggleStatus: () {
-                  controller.toggleResellerProductStatus(product.id!, product.status);
-                },
-              );
-            },
-          ),
-      ],
-    );
-  }
+  // MARK: - Sheets & Dialogs
 
-  Widget _buildOrdersTab() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'অর্ডার তালিকা',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        const SizedBox(height: 12),
-        if (controller.isLoadingOrders.value)
-          const Center(child: CircularProgressIndicator())
-        else if (controller.resellerOrders.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 48.0),
-              child: Text('কোনো রিসেলার অর্ডার নেই।'),
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.resellerOrders.length,
-            itemBuilder: (context, index) {
-              final order = controller.resellerOrders[index];
-              return ResellerOrderCard(
-                order: order,
-                resellerEarnings: order.resellerEarnings,
-              );
-            },
-          ),
-      ],
-    );
-  }
-
-  void _showWithdrawalSheet(BuildContext context) {
+  void _showWithdrawalRequestDialog(BuildContext context) {
     final nameCtrl = TextEditingController();
     final numCtrl = TextEditingController();
     final bankCtrl = TextEditingController();
-    final amtCtrl = TextEditingController();
+    final amountCtrl = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('ব্যালেন্স উত্তোলন ফর্ম'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'উত্তোলনের অনুরোধ',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'অ্যাকাউন্টের নাম'),
+                  decoration: const InputDecoration(
+                    labelText: 'অ্যাকাউন্ট নাম (Account Name)',
+                  ),
                 ),
                 TextField(
                   controller: numCtrl,
-                  decoration: const InputDecoration(labelText: 'নম্বর / অ্যাকাউন্ট নম্বর'),
+                  decoration: const InputDecoration(
+                    labelText: 'অ্যাকাউন্ট নম্বর / মোবাইল ব্যাংকিং নম্বর',
+                  ),
                 ),
                 TextField(
                   controller: bankCtrl,
-                  decoration: const InputDecoration(labelText: 'ব্যাংক / গেটওয়ে নাম (যেমন: বিকাশ)'),
+                  decoration: const InputDecoration(
+                    labelText:
+                        'ব্যাংক / গেটওয়ে নাম (যেমন: Bkash, Nagad, DBBL)',
+                  ),
                 ),
                 TextField(
-                  controller: amtCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'পরিমাণ (টাকা)'),
+                  controller: amountCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'উত্তোলনের পরিমাণ (৳)',
+                    helperText:
+                        'সর্বোচ্চ: ৳${controller.withdrawAvailableAmount.value.toStringAsFixed(2)}',
+                  ),
                 ),
               ],
             ),
@@ -476,18 +486,23 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('বাতিল'),
+              child: const Text('বাতিল', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF08B3AC)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+              ),
               onPressed: () async {
-                final double? amt = double.tryParse(amtCtrl.text.trim());
+                final double? amt = double.tryParse(amountCtrl.text);
                 if (nameCtrl.text.isEmpty ||
                     numCtrl.text.isEmpty ||
                     bankCtrl.text.isEmpty ||
                     amt == null ||
                     amt <= 0) {
-                  Get.snackbar('ত্রুটি', 'সবগুলো তথ্য সঠিকভাবে দিন।');
+                  Get.snackbar(
+                    'ত্রুটি',
+                    'দয়া করে সবগুলো তথ্য সঠিকভাবে প্রদান করুন।',
+                  );
                   return;
                 }
 
@@ -501,7 +516,13 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('অনুরোধ করুন', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'সাবমিট',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -509,24 +530,4 @@ class _ResellerDashboardScreenState extends State<ResellerDashboardScreen> {
     );
   }
 
-  void _showDeleteConfirmDialog(BuildContext context, String productId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('পণ্য মুছে ফেলা'),
-        content: const Text('আপনি কি নিশ্চিত যে পণ্যটি তালিকা থেকে মুছে ফেলতে চান?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('বাতিল')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () async {
-              Navigator.pop(context);
-              await controller.deleteResellerProduct(productId);
-            },
-            child: const Text('মুছুন', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
 }

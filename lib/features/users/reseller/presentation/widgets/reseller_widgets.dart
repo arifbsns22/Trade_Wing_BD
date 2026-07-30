@@ -7,7 +7,7 @@ import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_mode
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 // 1. Stat Card
-class VendorStatCard extends StatelessWidget {
+class ResellerStatCard extends StatelessWidget {
   final String title;
   final String value;
   final String subtitle;
@@ -16,7 +16,7 @@ class VendorStatCard extends StatelessWidget {
   final Color borderColor;
   final Color themeColor;
 
-  const VendorStatCard({
+  const ResellerStatCard({
     super.key,
     required this.title,
     required this.value,
@@ -496,14 +496,14 @@ class _BasketItemCardState extends State<BasketItemCard> {
 }
 
 // 4. Vendor Order Card
-class VendorOrderCard extends StatelessWidget {
+class ResellerOrderCard extends StatelessWidget {
   final OrderModel order;
-  final double vendorProfit;
+  final double resellerProfit;
 
-  const VendorOrderCard({
+  const ResellerOrderCard({
     super.key,
     required this.order,
-    required this.vendorProfit,
+    required this.resellerProfit,
   });
 
   @override
@@ -628,7 +628,7 @@ class VendorOrderCard extends StatelessWidget {
                 children: [
                   const Text('আপনার অর্জিত লাভ', style: TextStyle(fontSize: 10, color: Colors.grey)),
                   Text(
-                    '৳${vendorProfit.toStringAsFixed(2)}',
+                    '৳${resellerProfit.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,

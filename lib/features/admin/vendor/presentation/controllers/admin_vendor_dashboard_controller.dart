@@ -17,6 +17,7 @@ class AdminVendorDashboardController extends GetxController {
   final RxInt pendingOrdersCount = 0.obs;
   final RxDouble totalOrderedAmount = 0.0.obs;
   final RxDouble totalActualProfit = 0.0.obs;
+  final RxDouble totalAdminCommission = 0.0.obs;
   final RxDouble totalWithdrawnAmount = 0.0.obs;
   final RxDouble totalAvailableBalance = 0.0.obs;
 
@@ -28,33 +29,38 @@ class AdminVendorDashboardController extends GetxController {
 
   void setupListeners() {
     isLoading.value = true;
-
-    // 1. Stream Vendors
+ 
+    // 1. Stream Resellers
     _firestore
         .collection('users')
         .snapshots()
         .listen((userSnapshot) {
-      final vendors = userSnapshot.docs.where((doc) {
-        final role = (doc.data()['role'] ?? '').toString().toLowerCase().trim();
-        return role == 'vendor';
+      final resellers = userSnapshot.docs.where((doc) {
+        final data = doc.data();
+        final role = (data['role'] ?? '').toString().toLowerCase().trim();
+        final verificationStatus = (data['vendorVerificationStatus'] ?? '').toString().toLowerCase().trim();
+        return role == 'vendor' ||
+            verificationStatus == 'pending' ||
+            verificationStatus == 'hold' ||
+            verificationStatus == 'rejected';
       }).map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
-
-      vendorsList.value = vendors;
-      totalVendorsCount.value = vendors.length;
+ 
+      vendorsList.value = resellers;
+      totalVendorsCount.value = resellers.length;
       _calculateAggregates();
       isLoading.value = false;
     }, onError: (e) {
-      debugPrint('Error loading admin vendors: $e');
+      debugPrint('Error loading admin resellers: $e');
     });
-
-    // 2. Stream Vendor Orders
+ 
+    // 2. Stream Reseller Orders
     _firestore
         .collection('orders')
-        .where('isVendorOrder', isEqualTo: true)
+        .where('isResellerOrder', isEqualTo: true)
         .snapshots()
         .listen((orderSnapshot) {
       vendorOrders.value = orderSnapshot.docs.map((doc) {
@@ -62,13 +68,13 @@ class AdminVendorDashboardController extends GetxController {
         data['id'] = doc.id;
         return data;
       }).toList();
-
+ 
       _calculateAggregates();
     }, onError: (e) {
-      debugPrint('Error loading admin vendor orders: $e');
+      debugPrint('Error loading admin reseller orders: $e');
     });
-
-    // 3. Stream Vendor Withdrawals
+ 
+    // 3. Stream Reseller Withdrawals
     _firestore
         .collection('withdrawals')
         .where('userRole', isEqualTo: 'vendor')
@@ -79,10 +85,10 @@ class AdminVendorDashboardController extends GetxController {
         data['id'] = doc.id;
         return data;
       }).toList();
-
+ 
       _calculateAggregates();
     }, onError: (e) {
-      debugPrint('Error loading admin vendor withdrawals: $e');
+      debugPrint('Error loading admin reseller withdrawals: $e');
     });
   }
 
@@ -98,14 +104,17 @@ class AdminVendorDashboardController extends GetxController {
     }
     totalOrderedAmount.value = orderedSum;
 
-    // Profits
+    // Reseller profits & Admin Commission
     double profitSum = 0.0;
+    double commSum = 0.0;
     for (var o in vendorOrders) {
       if (o['orderStatus'] == 'delivered') {
-        profitSum += (o['vendorProfit'] as num?)?.toDouble() ?? 0.0;
+        profitSum += (o['resellerEarnings'] as num?)?.toDouble() ?? 0.0;
+        commSum += (o['adminCommission'] as num?)?.toDouble() ?? 0.0;
       }
     }
     totalActualProfit.value = profitSum;
+    totalAdminCommission.value = commSum;
 
     // Withdrawals
     double withdrawnSum = 0.0;
@@ -120,7 +129,7 @@ class AdminVendorDashboardController extends GetxController {
     totalAvailableBalance.value = (profitSum - withdrawnSum).clamp(0.0, 9999999.0);
   }
 
-  // Get specific stats per vendor mobile
+  // Get specific stats per reseller mobile
   Map<String, dynamic> getVendorStats(String mobile) {
     final mob = mobile.trim();
     final orders = vendorOrders.where((o) => (o['vendorMobile'] ?? '').toString().trim() == mob).toList();
@@ -128,9 +137,11 @@ class AdminVendorDashboardController extends GetxController {
     final pending = orders.where((o) => o['orderStatus'] == 'pending').length;
 
     double profit = 0.0;
+    double comm = 0.0;
     for (var o in orders) {
       if (o['orderStatus'] == 'delivered') {
-        profit += (o['vendorProfit'] as num?)?.toDouble() ?? 0.0;
+        profit += (o['resellerEarnings'] as num?)?.toDouble() ?? 0.0;
+        comm += (o['adminCommission'] as num?)?.toDouble() ?? 0.0;
       }
     }
 
@@ -148,8 +159,45 @@ class AdminVendorDashboardController extends GetxController {
       'completedOrders': completed,
       'pendingOrders': pending,
       'profit': profit,
+      'commission': comm,
       'withdrawn': withdrawn,
       'balance': balance,
     };
+  }
+
+  Future<void> updateVerificationStatus(String mobile, String status) async {
+    try {
+      final updates = <String, dynamic>{
+        'vendorVerificationStatus': status,
+      };
+      if (status == 'approved') {
+        updates['role'] = 'Vendor';
+      } else if (status == 'rejected') {
+        // Demote back to customer if rejected
+        updates['role'] = 'Customer';
+      }
+      await _firestore.collection('users').doc(mobile).update(updates);
+      Get.snackbar(
+        'সফল হয়েছে',
+        'স্ট্যাটাস পরিবর্তন করে "$status" করা হয়েছে।',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'ত্রুটি',
+        'স্ট্যাটাস পরিবর্তন করতে ব্যর্থ হয়েছে: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    }
   }
 }

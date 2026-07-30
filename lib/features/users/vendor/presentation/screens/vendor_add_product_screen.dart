@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:trade_wign_bd/features/users/reseller/presentation/controllers/reseller_controller.dart';
+import 'package:trade_wign_bd/features/users/vendor/presentation/controllers/vendor_controller.dart';
 import 'package:trade_wign_bd/features/admin/ecommerce/domain/models/product_model.dart';
 
-class ResellerAddProductScreen extends StatefulWidget {
+class VendorAddProductScreen extends StatefulWidget {
   final Product? product;
-  const ResellerAddProductScreen({super.key, this.product});
+  const VendorAddProductScreen({super.key, this.product});
 
   @override
-  State<ResellerAddProductScreen> createState() => _ResellerAddProductScreenState();
+  State<VendorAddProductScreen> createState() => _VendorAddProductScreenState();
 }
 
-class _ResellerAddProductScreenState extends State<ResellerAddProductScreen> {
-  final ResellerController controller = Get.find<ResellerController>();
+class _VendorAddProductScreenState extends State<VendorAddProductScreen> {
+  final VendorController controller = Get.find<VendorController>();
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameCtrl;
@@ -388,9 +388,9 @@ class _ResellerAddProductScreenState extends State<ResellerAddProductScreen> {
 
     bool success;
     if (isEdit) {
-      success = await controller.updateResellerProduct(widget.product!.id!, newProduct);
+      success = await controller.updateVendorProduct(widget.product!.id!, newProduct);
     } else {
-      success = await controller.addResellerProduct(newProduct);
+      success = await controller.addVendorProduct(newProduct);
     }
 
     if (success) {

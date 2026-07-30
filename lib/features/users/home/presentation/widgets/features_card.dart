@@ -15,6 +15,8 @@ import 'package:trade_wign_bd/features/users/traning/presentation/screens/user_t
 
 import 'package:trade_wign_bd/features/users/vendor/presentation/screens/vendor_dashboard_screen.dart';
 import 'package:trade_wign_bd/features/users/reseller/presentation/screens/reseller_dashboard_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trade_wign_bd/features/users/home/presentation/widgets/verification_dialog.dart';
 
 class FeatureItem {
   final String title;
@@ -42,15 +44,59 @@ final List<FeatureItem> featureList = [
   FeatureItem(
     title: AppTexts.reselling,
     imagePath: FeaturesPath.reselling,
-    onTap: () {
+    onTap: () async {
       final authController = Get.find<AuthController>();
       final role = authController.currentUserRole.value.toLowerCase().trim();
+      if (role == 'guest customer' || role == 'guest' || role == '') {
+        Get.snackbar(
+          'লগইন প্রয়োজন',
+          'এই বিভাগে প্রবেশ করতে অনুগ্রহ করে একটি অ্যাকাউন্ট তৈরি করুন বা লগইন করুন।',
+          backgroundColor: Colors.white.withValues(alpha: 0.9),
+          colorText: Colors.black87,
+          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+          borderWidth: 1,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
       if (role == 'reseller' || role == 'admin' || role == 'super admin') {
         Get.to(() => const ResellerDashboardScreen());
-      } else {
+        return;
+      }
+
+      // Show loading indicator
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final mobile = authController.currentUserMobile.value;
+        final doc = await FirebaseFirestore.instance.collection('users').doc(mobile).get();
+        Get.back(); // Dismiss loading
+
+        if (doc.exists) {
+          final data = doc.data() ?? {};
+          final status = (data['resellerVerificationStatus'] ?? '').toString().toLowerCase().trim();
+
+          if (status == 'approved') {
+            authController.currentUserRole.value = 'reseller';
+            Get.to(() => const ResellerDashboardScreen());
+          } else if (status == 'pending' || status == 'hold' || status == 'rejected') {
+            Get.dialog(VerificationStatusDialog(targetRole: 'reseller', status: status));
+          } else {
+            Get.dialog(const VerificationDialog(targetRole: 'reseller'));
+          }
+        } else {
+          Get.dialog(const VerificationDialog(targetRole: 'reseller'));
+        }
+      } catch (e) {
+        Get.back(); // Dismiss loading
         Get.snackbar(
-          'প্রবেশাধিকার সংরক্ষিত',
-          'এই বিভাগটি শুধুমাত্র নিবন্ধিত রিসেলারদের জন্য সংরক্ষিত।',
+          'ত্রুটি',
+          'সার্ভার সংযোগে সমস্যা হয়েছে: $e',
           backgroundColor: Colors.white.withValues(alpha: 0.9),
           colorText: Colors.black87,
           borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
@@ -64,15 +110,59 @@ final List<FeatureItem> featureList = [
   FeatureItem(
     title: AppTexts.vendorship,
     imagePath: FeaturesPath.vendorship,
-    onTap: () {
+    onTap: () async {
       final authController = Get.find<AuthController>();
       final role = authController.currentUserRole.value.toLowerCase().trim();
+      if (role == 'guest customer' || role == 'guest' || role == '') {
+        Get.snackbar(
+          'লগইন প্রয়োজন',
+          'এই বিভাগে প্রবেশ করতে অনুগ্রহ করে একটি অ্যাকাউন্ট তৈরি করুন বা লগইন করুন।',
+          backgroundColor: Colors.white.withValues(alpha: 0.9),
+          colorText: Colors.black87,
+          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+          borderWidth: 1,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+
       if (role == 'vendor' || role == 'admin' || role == 'super admin') {
         Get.to(() => const VendorDashboardScreen());
-      } else {
+        return;
+      }
+
+      // Show loading indicator
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      try {
+        final mobile = authController.currentUserMobile.value;
+        final doc = await FirebaseFirestore.instance.collection('users').doc(mobile).get();
+        Get.back(); // Dismiss loading
+
+        if (doc.exists) {
+          final data = doc.data() ?? {};
+          final status = (data['vendorVerificationStatus'] ?? '').toString().toLowerCase().trim();
+
+          if (status == 'approved') {
+            authController.currentUserRole.value = 'vendor';
+            Get.to(() => const VendorDashboardScreen());
+          } else if (status == 'pending' || status == 'hold' || status == 'rejected') {
+            Get.dialog(VerificationStatusDialog(targetRole: 'vendor', status: status));
+          } else {
+            Get.dialog(const VerificationDialog(targetRole: 'vendor'));
+          }
+        } else {
+          Get.dialog(const VerificationDialog(targetRole: 'vendor'));
+        }
+      } catch (e) {
+        Get.back(); // Dismiss loading
         Get.snackbar(
-          'প্রবেশাধিকার সংরক্ষিত',
-          'এই বিভাগটি শুধুমাত্র নিবন্ধিত ভেন্ডরদের জন্য সংরক্ষিত।',
+          'ত্রুটি',
+          'সার্ভার সংযোগে সমস্যা হয়েছে: $e',
           backgroundColor: Colors.white.withValues(alpha: 0.9),
           colorText: Colors.black87,
           borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
