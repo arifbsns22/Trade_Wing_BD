@@ -233,4 +233,35 @@ class AdminUsersController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> deleteUser(String mobile) async {
+    try {
+      await _firestore.collection('users').doc(mobile).delete();
+      // Remove locally
+      usersList.removeWhere((u) => u['mobile'] == mobile);
+      usersList.refresh();
+      searchUsers(''); // Re-apply filter
+      Get.snackbar(
+        'সফল',
+        'ইউজারটি সফলভাবে ডিলিট করা হয়েছে।',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'ত্রুটি',
+        'ইউজার ডিলিট করতে ব্যর্থ হয়েছে: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
 }

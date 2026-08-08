@@ -40,6 +40,7 @@ class AdminVendorDashboardController extends GetxController {
         final role = (data['role'] ?? '').toString().toLowerCase().trim();
         final verificationStatus = (data['vendorVerificationStatus'] ?? '').toString().toLowerCase().trim();
         return role == 'vendor' ||
+            verificationStatus == 'approved' ||
             verificationStatus == 'pending' ||
             verificationStatus == 'hold' ||
             verificationStatus == 'rejected';
@@ -167,14 +168,23 @@ class AdminVendorDashboardController extends GetxController {
 
   Future<void> updateVerificationStatus(String mobile, String status) async {
     try {
+      final userDoc = await _firestore.collection('users').doc(mobile).get();
+      final userData = userDoc.data() ?? {};
+      final resellerStatus = (userData['resellerVerificationStatus'] ?? '').toString().toLowerCase().trim();
+      final currentRole = (userData['role'] ?? '').toString().toLowerCase().trim();
+
       final updates = <String, dynamic>{
         'vendorVerificationStatus': status,
       };
+      
       if (status == 'approved') {
         updates['role'] = 'Vendor';
-      } else if (status == 'rejected') {
-        // Demote back to customer if rejected
-        updates['role'] = 'Customer';
+      } else if (status == 'rejected' || status == 'hold') {
+        if (resellerStatus == 'approved' || currentRole == 'reseller') {
+          updates['role'] = 'Reseller';
+        } else {
+          updates['role'] = 'Customer';
+        }
       }
       await _firestore.collection('users').doc(mobile).update(updates);
       Get.snackbar(
@@ -191,6 +201,33 @@ class AdminVendorDashboardController extends GetxController {
       Get.snackbar(
         'ত্রুটি',
         'স্ট্যাটাস পরিবর্তন করতে ব্যর্থ হয়েছে: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
+
+  Future<void> deleteUser(String mobile) async {
+    try {
+      await _firestore.collection('users').doc(mobile).delete();
+      Get.snackbar(
+        'সফল হয়েছে',
+        'ইউজারটি সফলভাবে ডিলিট করা হয়েছে।',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'ত্রুটি',
+        'ইউজার ডিলিট করতে ব্যর্থ হয়েছে: $e',
         backgroundColor: Colors.white.withValues(alpha: 0.9),
         colorText: Colors.black87,
         borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),

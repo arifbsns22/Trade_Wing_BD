@@ -193,7 +193,7 @@ class PhysicalTrainingDetailSheet extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'উপযুক্ত রোল: ${TrainingController.getRoleBangla(training.targetedRole)}',
+                    'উপযুক্ত ব্যাজ: ${TrainingController.getRoleBangla(training.targetedRole)}',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,

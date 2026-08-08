@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:trade_wign_bd/features/auth/presentation/screens/login_screen.dart';
+import 'package:trade_wign_bd/features/users/home/presentation/widgets/verification_dialog.dart';
 import 'package:trade_wign_bd/features/users/vendor/presentation/controllers/vendor_controller.dart';
 import 'package:trade_wign_bd/features/users/vendor/presentation/widgets/vendor_stat_card.dart';
 import 'package:trade_wign_bd/features/users/vendor/presentation/widgets/vendor_order_card.dart';
 import 'package:trade_wign_bd/features/users/vendor/presentation/widgets/vendor_product_card.dart';
 import 'package:trade_wign_bd/features/users/vendor/presentation/screens/vendor_add_product_screen.dart';
+import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
@@ -17,7 +21,68 @@ class VendorDashboardScreen extends StatefulWidget {
 
 class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   final VendorController controller = Get.put(VendorController());
+  final AuthController _authController = Get.find<AuthController>();
   int _activeTabIndex = 0; // 0: Overview, 1: Products, 2: Orders
+
+  Future<void> _checkAndHandleVendorStatus() async {
+    final role = _authController.currentUserRole.value.toLowerCase().trim();
+    
+    // If user cancelled login or still guest, do nothing
+    if (_authController.currentUserMobile.value.trim().isEmpty ||
+        ['guest customer', 'guest', ''].contains(role)) {
+      return;
+    }
+
+    // If already verified or admin, just rebuild to show dashboard
+    if (role == 'vendor' || role == 'admin' || role == 'super admin') {
+      setState(() {});
+      return;
+    }
+
+    // Otherwise, check Firestore status
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      final mobile = _authController.currentUserMobile.value.trim();
+      final doc = await FirebaseFirestore.instance.collection('users').doc(mobile).get();
+      Get.back(); // Dismiss loading
+
+      if (doc.exists) {
+        final data = doc.data() ?? {};
+        final status = (data['vendorVerificationStatus'] ?? '').toString().toLowerCase().trim();
+
+        if (status == 'approved') {
+          _authController.currentUserRole.value = 'vendor';
+          setState(() {}); // Rebuild to show dashboard
+        } else if (status == 'pending' || status == 'hold' || status == 'rejected') {
+          Get.back(); // Pop VendorDashboardScreen
+          Get.dialog(VerificationStatusDialog(targetRole: 'vendor', status: status));
+        } else {
+          Get.back(); // Pop VendorDashboardScreen
+          Get.dialog(const VerificationDialog(targetRole: 'vendor'));
+        }
+      } else {
+        Get.back(); // Pop VendorDashboardScreen
+        Get.dialog(const VerificationDialog(targetRole: 'vendor'));
+      }
+    } catch (e) {
+      Get.back(); // Dismiss loading
+      Get.back(); // Pop VendorDashboardScreen
+      Get.snackbar(
+        'ত্রুটি',
+        'সার্ভার সংযোগে সমস্যা হয়েছে: $e',
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        colorText: Colors.black87,
+        borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
+        borderWidth: 1,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +111,80 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         ),
       ),
       body: Obx(() {
+        final isGuest = _authController.currentUserMobile.value.trim().isEmpty ||
+            ['guest customer', 'guest', ''].contains(_authController.currentUserRole.value.toLowerCase().trim());
+
+        if (isGuest) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.storefront_outlined,
+                      size: 80,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'ভেন্ডর ড্যাশবোর্ডে আপনাকে স্বাগতম!',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'ভেন্ডর সুবিধা এবং পণ্য যুক্ত করতে অনুগ্রহ করে লগইন করুন।',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      onPressed: () {
+                        Get.to(() => const LoginScreen(returnBack: true))?.then((value) {
+                          _checkAndHandleVendorStatus();
+                        });
+                      },
+                      child: const Text(
+                        'লগইন করুন',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (controller.vendorMobile.isEmpty) {
           return const Center(child: Text('অনুগ্রহ করে লগইন করুন।'));
         }

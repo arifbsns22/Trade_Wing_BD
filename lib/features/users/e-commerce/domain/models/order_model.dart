@@ -22,6 +22,7 @@ class OrderModel {
   final List<Map<String, dynamic>> items;
   final double totalAmount;
   final int rewardPointsEarned;
+  final double walletDiscount;
   final String paymentMethod;
   final String? offlineGateway;
   final String? offlineTrxId;
@@ -40,6 +41,12 @@ class OrderModel {
   final double resellerEarnings;
   final double adminCommission;
 
+  // Delivery integration fields
+  final String? deliveryProvider;
+  final String? consignmentId;
+  final String? trackingCode;
+  final String? deliveryStatus;
+
   OrderModel({
     required this.orderId,
     required this.userMobile,
@@ -48,6 +55,7 @@ class OrderModel {
     required this.items,
     required this.totalAmount,
     required this.rewardPointsEarned,
+    this.walletDiscount = 0.0,
     required this.paymentMethod,
     this.offlineGateway,
     this.offlineTrxId,
@@ -63,6 +71,10 @@ class OrderModel {
     this.resellerMobile,
     this.resellerEarnings = 0.0,
     this.adminCommission = 0.0,
+    this.deliveryProvider,
+    this.consignmentId,
+    this.trackingCode,
+    this.deliveryStatus,
   });
 
   Map<String, dynamic> toMap() {
@@ -74,6 +86,7 @@ class OrderModel {
       'items': items,
       'totalAmount': totalAmount,
       'rewardPointsEarned': rewardPointsEarned,
+      'walletDiscount': walletDiscount,
       'paymentMethod': paymentMethod,
       'offlineGateway': offlineGateway,
       'offlineTrxId': offlineTrxId,
@@ -89,6 +102,10 @@ class OrderModel {
       'resellerMobile': resellerMobile,
       'resellerEarnings': resellerEarnings,
       'adminCommission': adminCommission,
+      'deliveryProvider': deliveryProvider,
+      'consignmentId': consignmentId,
+      'trackingCode': trackingCode,
+      'deliveryStatus': deliveryStatus,
     };
   }
 
@@ -101,6 +118,7 @@ class OrderModel {
       items: List<Map<String, dynamic>>.from(map['items'] ?? []),
       totalAmount: (map['totalAmount'] ?? 0).toDouble(),
       rewardPointsEarned: map['rewardPointsEarned'] ?? 0,
+      walletDiscount: (map['walletDiscount'] ?? 0.0).toDouble(),
       paymentMethod: map['paymentMethod'] ?? '',
       offlineGateway: map['offlineGateway'],
       offlineTrxId: map['offlineTrxId'],
@@ -116,6 +134,10 @@ class OrderModel {
       resellerMobile: map['resellerMobile'],
       resellerEarnings: (map['resellerEarnings'] ?? 0.0).toDouble(),
       adminCommission: (map['adminCommission'] ?? 0.0).toDouble(),
+      deliveryProvider: map['deliveryProvider'],
+      consignmentId: map['consignmentId']?.toString(),
+      trackingCode: map['trackingCode'],
+      deliveryStatus: map['deliveryStatus'],
     );
   }
 

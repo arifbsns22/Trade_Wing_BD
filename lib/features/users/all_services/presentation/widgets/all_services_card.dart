@@ -102,7 +102,7 @@ class AllServicesGrid extends StatelessWidget {
           ],
         ),
         content: Text(
-          'আপনার বর্তমান রোল ($roleName)-এর জন্য আরও $pendingCount টি ট্রেনিং বাকি আছে। অ্যাপের সকল সুবিধা ব্যবহার করতে প্রথমে ট্রেনিংগুলো সম্পন্ন করুন।',
+          'আপনার বর্তমান ব্যাজ ($roleName)-এর জন্য আরও $pendingCount টি ট্রেনিং বাকি আছে। অ্যাপের সকল সুবিধা ব্যবহার করতে প্রথমে ট্রেনিংগুলো সম্পন্ন করুন।',
           style: const TextStyle(
             fontSize: 13,
             height: 1.4,

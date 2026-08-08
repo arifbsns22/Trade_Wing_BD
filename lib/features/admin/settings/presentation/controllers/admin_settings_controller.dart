@@ -29,6 +29,25 @@ class AdminSettingsController extends GetxController {
   // Payment states
   final RxDouble vendorCommission = 0.0.obs;
   final RxDouble resellerCommission = 5.0.obs;
+  final RxInt rewardPointsRate = 100.obs;
+
+  // Delivery settings
+  final RxBool isSteadfastActive = false.obs;
+  final RxString steadfastApiKey = ''.obs;
+  final RxString steadfastSecretKey = ''.obs;
+  final RxString steadfastBaseUrl = 'https://portal.packzy.com/api/v1'.obs;
+
+  // Manual Delivery settings
+  final RxBool isManualDeliveryActive = true.obs;
+  final RxString manualDeliveryName = 'ম্যানুয়াল ডেলিভারি'.obs;
+  final RxString manualDeliveryTime = '২-৩ দিন'.obs;
+
+  // Weight-wise Delivery settings
+  final RxBool isWeightWiseChargeActive = false.obs;
+  final RxDouble weightBaseChargeInside = 60.0.obs;
+  final RxDouble weightBaseChargeOutside = 120.0.obs;
+  final RxDouble weightBaseMax = 1.0.obs;
+  final RxDouble weightPerKgChargeExtra = 20.0.obs;
 
   final RxBool isCodActive = true.obs;
   final RxString codName = 'Cash On Delivery'.obs;
@@ -137,6 +156,22 @@ class AdminSettingsController extends GetxController {
 
       vendorCommission.value = prefs.getDouble('settings_commission_vendor') ?? 0.0;
       resellerCommission.value = prefs.getDouble('settings_commission_reseller') ?? 5.0;
+      rewardPointsRate.value = prefs.getInt('settings_reward_points_rate') ?? 100;
+
+      isSteadfastActive.value = prefs.getBool('settings_delivery_steadfast_active') ?? false;
+      steadfastApiKey.value = prefs.getString('settings_delivery_steadfast_api_key') ?? '';
+      steadfastSecretKey.value = prefs.getString('settings_delivery_steadfast_secret_key') ?? '';
+      steadfastBaseUrl.value = prefs.getString('settings_delivery_steadfast_base_url') ?? 'https://portal.packzy.com/api/v1';
+
+      isManualDeliveryActive.value = prefs.getBool('settings_delivery_manual_active') ?? true;
+      manualDeliveryName.value = prefs.getString('settings_delivery_manual_name') ?? 'ম্যানুয়াল ডেলিভারি';
+      manualDeliveryTime.value = prefs.getString('settings_delivery_manual_time') ?? '২-৩ দিন';
+
+      isWeightWiseChargeActive.value = prefs.getBool('settings_delivery_weight_active') ?? false;
+      weightBaseChargeInside.value = prefs.getDouble('settings_delivery_weight_base_inside') ?? 60.0;
+      weightBaseChargeOutside.value = prefs.getDouble('settings_delivery_weight_base_outside') ?? 120.0;
+      weightBaseMax.value = prefs.getDouble('settings_delivery_weight_base_max') ?? 1.0;
+      weightPerKgChargeExtra.value = prefs.getDouble('settings_delivery_weight_extra') ?? 20.0;
 
       // Override runtime in-memory ImagePath values if we have cached custom logo paths
       if (customLightLogoPath.value.isNotEmpty) {
@@ -205,6 +240,37 @@ class AdminSettingsController extends GetxController {
 
           vendorCommission.value = ((data['vendorCommission'] ?? vendorCommission.value) as num).toDouble();
           resellerCommission.value = ((data['resellerCommission'] ?? resellerCommission.value) as num).toDouble();
+          rewardPointsRate.value = data['rewardPointsRate'] ?? rewardPointsRate.value;
+
+          isSteadfastActive.value = data['isSteadfastActive'] ?? isSteadfastActive.value;
+          steadfastApiKey.value = data['steadfastApiKey'] ?? steadfastApiKey.value;
+          steadfastSecretKey.value = data['steadfastSecretKey'] ?? steadfastSecretKey.value;
+          steadfastBaseUrl.value = data['steadfastBaseUrl'] ?? steadfastBaseUrl.value;
+
+          // Sync to SharedPreferences for service calls
+          await prefs.setBool('settings_delivery_steadfast_active', isSteadfastActive.value);
+          await prefs.setString('settings_delivery_steadfast_api_key', steadfastApiKey.value);
+          await prefs.setString('settings_delivery_steadfast_secret_key', steadfastSecretKey.value);
+          await prefs.setString('settings_delivery_steadfast_base_url', steadfastBaseUrl.value);
+
+          isManualDeliveryActive.value = data['isManualDeliveryActive'] ?? isManualDeliveryActive.value;
+          manualDeliveryName.value = data['manualDeliveryName'] ?? manualDeliveryName.value;
+          manualDeliveryTime.value = data['manualDeliveryTime'] ?? manualDeliveryTime.value;
+
+          isWeightWiseChargeActive.value = data['isWeightWiseChargeActive'] ?? isWeightWiseChargeActive.value;
+          weightBaseChargeInside.value = ((data['weightBaseChargeInside'] ?? weightBaseChargeInside.value) as num).toDouble();
+          weightBaseChargeOutside.value = ((data['weightBaseChargeOutside'] ?? weightBaseChargeOutside.value) as num).toDouble();
+          weightBaseMax.value = ((data['weightBaseMax'] ?? weightBaseMax.value) as num).toDouble();
+          weightPerKgChargeExtra.value = ((data['weightPerKgChargeExtra'] ?? weightPerKgChargeExtra.value) as num).toDouble();
+
+          await prefs.setBool('settings_delivery_manual_active', isManualDeliveryActive.value);
+          await prefs.setString('settings_delivery_manual_name', manualDeliveryName.value);
+          await prefs.setString('settings_delivery_manual_time', manualDeliveryTime.value);
+          await prefs.setBool('settings_delivery_weight_active', isWeightWiseChargeActive.value);
+          await prefs.setDouble('settings_delivery_weight_base_inside', weightBaseChargeInside.value);
+          await prefs.setDouble('settings_delivery_weight_base_outside', weightBaseChargeOutside.value);
+          await prefs.setDouble('settings_delivery_weight_base_max', weightBaseMax.value);
+          await prefs.setDouble('settings_delivery_weight_extra', weightPerKgChargeExtra.value);
 
           if (data['lightLogo'] != null && customLightLogoPath.value.isEmpty) {
             customLightLogoPath.value = data['lightLogo'];
@@ -311,6 +377,22 @@ class AdminSettingsController extends GetxController {
 
       await prefs.setDouble('settings_commission_vendor', vendorCommission.value);
       await prefs.setDouble('settings_commission_reseller', resellerCommission.value);
+      await prefs.setInt('settings_reward_points_rate', rewardPointsRate.value);
+
+      await prefs.setBool('settings_delivery_steadfast_active', isSteadfastActive.value);
+      await prefs.setString('settings_delivery_steadfast_api_key', steadfastApiKey.value);
+      await prefs.setString('settings_delivery_steadfast_secret_key', steadfastSecretKey.value);
+      await prefs.setString('settings_delivery_steadfast_base_url', steadfastBaseUrl.value);
+
+      await prefs.setBool('settings_delivery_manual_active', isManualDeliveryActive.value);
+      await prefs.setString('settings_delivery_manual_name', manualDeliveryName.value);
+      await prefs.setString('settings_delivery_manual_time', manualDeliveryTime.value);
+
+      await prefs.setBool('settings_delivery_weight_active', isWeightWiseChargeActive.value);
+      await prefs.setDouble('settings_delivery_weight_base_inside', weightBaseChargeInside.value);
+      await prefs.setDouble('settings_delivery_weight_base_outside', weightBaseChargeOutside.value);
+      await prefs.setDouble('settings_delivery_weight_base_max', weightBaseMax.value);
+      await prefs.setDouble('settings_delivery_weight_extra', weightPerKgChargeExtra.value);
 
       // Save modules state
       activeModules.forEach((key, value) async {
@@ -330,6 +412,19 @@ class AdminSettingsController extends GetxController {
         'modules': Map<String, bool>.from(activeModules),
         'vendorCommission': vendorCommission.value,
         'resellerCommission': resellerCommission.value,
+        'rewardPointsRate': rewardPointsRate.value,
+        'isSteadfastActive': isSteadfastActive.value,
+        'steadfastApiKey': steadfastApiKey.value,
+        'steadfastSecretKey': steadfastSecretKey.value,
+        'steadfastBaseUrl': steadfastBaseUrl.value,
+        'isManualDeliveryActive': isManualDeliveryActive.value,
+        'manualDeliveryName': manualDeliveryName.value,
+        'manualDeliveryTime': manualDeliveryTime.value,
+        'isWeightWiseChargeActive': isWeightWiseChargeActive.value,
+        'weightBaseChargeInside': weightBaseChargeInside.value,
+        'weightBaseChargeOutside': weightBaseChargeOutside.value,
+        'weightBaseMax': weightBaseMax.value,
+        'weightPerKgChargeExtra': weightPerKgChargeExtra.value,
         'isCodActive': isCodActive.value,
         'codName': codName.value,
         'codAmount': codAmount.value,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:trade_wign_bd/features/auth/data/service/auth_service.dart';
 import 'package:trade_wign_bd/features/admin/users/presentation/controllers/admin_users_controller.dart';
-import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
 
 class AddUserController extends GetxController {
   final AuthService _authService = AuthService();
@@ -20,13 +19,6 @@ class AddUserController extends GetxController {
     'Customer',
     'Vendor',
     'Reseller',
-    'Brand Promoter',
-    'Sales Partner',
-    'Senior Sales Partner',
-    'Sub Dealer',
-    'Dealer',
-    'Senior Dealer',
-    'Master Dealer',
   ];
 
   @override

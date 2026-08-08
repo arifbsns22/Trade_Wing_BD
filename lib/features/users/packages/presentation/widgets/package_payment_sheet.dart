@@ -171,73 +171,98 @@ class _PackagePaymentSheetState extends State<_PackagePaymentSheet> {
       }
 
       if (_isCustomer) {
-
         if (mobile.isNotEmpty) {
           try {
+            // Retrieve user's referral code and count referrals
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(mobile).get();
+            final userData = userDoc.data() ?? {};
+            final myReferralCode = (userData['referralCode'] as String? ?? '').trim();
+
+            int directCount = 0;
+            if (myReferralCode.isNotEmpty) {
+              final refsSnapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .where('referredBy', isEqualTo: myReferralCode)
+                  .get();
+              directCount = refsSnapshot.docs.length;
+            }
+
+            final has30Refs = directCount >= 30;
+
+            final Map<String, dynamic> updateData = {
+              'packagePurchased': true,
+              'nidNumber': _nidController.text,
+              'tradeLicense': _tradeLicenseController.text,
+            };
+
+            if (has30Refs) {
+              updateData['role'] = 'Active Customer';
+            }
+
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(mobile)
-                .set({
-                  'role': 'Active Customer',
-                  'nidNumber': _nidController.text,
-                  'tradeLicense': _tradeLicenseController.text,
-                }, SetOptions(merge: true));
+                .set(updateData, SetOptions(merge: true));
+
+            if (has30Refs) {
+              authCtrl.currentUserRole.value = 'Active Customer';
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('userRole', 'Active Customer');
+            }
+
+            final profileCtrl = Get.put(AdminProfileController());
+            await profileCtrl.fetchAdminProfile();
+
+            Get.defaultDialog(
+              title: has30Refs ? 'অভিনন্দন!' : 'পেমেন্ট সফল!',
+              titleStyle: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppColors.primaryColor,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    has30Refs
+                        ? 'আপনি সফলভাবে Active Customer এ উন্নীত হয়েছেন।'
+                        : 'আপনার মেম্বারশিপ প্যাকেজ কেনা সম্পন্ন হয়েছে! সক্রিয় কাস্টমার হতে আপনার কমপক্ষে ৩০ জন রেফারেল প্রয়োজন (আপনার বর্তমান রেফারেল: $directCount)।',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'আপনার বিজনেস কোড:',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    profileCtrl.referralCode.value,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      color: AppColors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'এখন থেকে প্যাকেজ কেনার সময় আর NID বা Trade License এর প্রয়োজন হবে না।',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.black),
+                  ),
+                ],
+              ),
+              confirm: ElevatedButton(
+                onPressed: () => Get.back(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                ),
+                child: const Text('ঠিক আছে', style: TextStyle(color: Colors.white)),
+              ),
+            );
           } catch (e) {
             debugPrint('Error updating role: $e');
           }
         }
-
-        authCtrl.currentUserRole.value = 'Active Customer';
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userRole', 'Active Customer');
-
-        final profileCtrl = Get.put(AdminProfileController());
-        await profileCtrl.fetchAdminProfile();
-
-        Get.defaultDialog(
-          title: 'অভিনন্দন!',
-          titleStyle: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: AppColors.primaryColor,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'আপনি সফলভাবে Active Customer এ উন্নীত হয়েছেন।',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'আপনার বিজনেস কোড:',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              SelectableText(
-                profileCtrl.referralCode.value,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                  color: AppColors.green,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'এখন থেকে প্যাকেজ কেনার সময় আর NID বা Trade License এর প্রয়োজন হবে না।',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.black),
-              ),
-            ],
-          ),
-          confirm: ElevatedButton(
-            onPressed: () => Get.back(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-            ),
-            child: const Text('ঠিক আছে', style: TextStyle(color: Colors.white)),
-          ),
-        );
       } else {
         Get.snackbar(
   'সফল',

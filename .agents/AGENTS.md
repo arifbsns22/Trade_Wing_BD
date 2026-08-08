@@ -38,3 +38,8 @@ Get.snackbar(
   margin: const EdgeInsets.all(16),
 );
 ```
+
+## User Badges Nomenclature
+
+* **Terminology:** Refer to user roles/ranks as **"User Badges"** (ইউজার ব্যাজ) instead of "User Roles" in UI text, dialogs, and user-facing communications.
+* **Goal Orientation:** In user-facing screens (e.g., Profile or Business Club screens), frames, and settings, clearly explain that each user has a target to achieve or promote to the next badge.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines_plus/timelines_plus.dart';
@@ -7,6 +8,7 @@ import 'package:trade_wign_bd/features/users/e-commerce/domain/models/order_mode
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/common/services/notification_helper.dart';
+import 'package:trade_wign_bd/common/services/steadfast_service.dart';
 
 void showOrderDetailsBottomSheet(BuildContext context, OrderModel order) {
   Get.bottomSheet(
@@ -30,6 +32,13 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   bool isUpdating = false;
   late bool isAdmin;
 
+  // Steadfast delivery integration states
+  bool isSteadfastActive = false;
+  String? trackingCode;
+  String? consignmentId;
+  String? deliveryProvider;
+  String? deliveryStatus;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +50,21 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
     final isVendor = role == 'vendor';
     final isOrderOwner = widget.order.isResellerOrder == true && widget.order.resellerMobile == mobile;
     isAdmin = role == 'super admin' || role == 'admin' || (isVendor && isOrderOwner);
+
+    trackingCode = widget.order.trackingCode;
+    consignmentId = widget.order.consignmentId;
+    deliveryProvider = widget.order.deliveryProvider;
+    deliveryStatus = widget.order.deliveryStatus;
+    _checkSteadfastStatus();
+  }
+
+  Future<void> _checkSteadfastStatus() async {
+    final active = await SteadfastService.isActive();
+    if (mounted) {
+      setState(() {
+        isSteadfastActive = active;
+      });
+    }
   }
 
   Future<void> _updateOrderStatus(OrderStatus newStatus) async {
@@ -221,6 +245,8 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     _sectionTitle('Admin Actions', Icons.admin_panel_settings_outlined),
                     const SizedBox(height: 10),
                     _buildAdminActionsCard(),
+                    const SizedBox(height: 16),
+                    _buildDeliveryCourierCard(),
                     const SizedBox(height: 16),
                   ],
 
@@ -888,5 +914,294 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
         ),
       ],
     );
+  }
+
+  Widget _buildDeliveryCourierCard() {
+    if (!isSteadfastActive) return const SizedBox.shrink();
+
+    final hasSent = trackingCode != null && trackingCode!.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.airport_shuttle_rounded, color: Colors.blue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Steadfast Delivery Service',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'অর্ডারটি সরাসরি কুরিয়ারে পাঠান ও ট্র্যাক করুন',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 24),
+          if (!hasSent) ...[
+            const Text(
+              'এই অর্ডারটি এখনও স্টেডফাস্ট কুরিয়ারে পাঠানো হয়নি। আপনি কি মার্চেন্ট এপিআই এর মাধ্যমে পাঠাতে চান?',
+              style: TextStyle(fontSize: 12, color: Colors.black54, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.send_rounded, size: 16),
+                label: const Text(
+                  'স্টেডফাস্ট কুরিয়ারে বুকিং দিন',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _sendToSteadfast,
+              ),
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('কুরিয়ার প্রোভাইডার:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(deliveryProvider?.toUpperCase() ?? 'STEADFAST', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('ট্র্যাকিং কোড:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Row(
+                  children: [
+                    Text(trackingCode ?? 'N/A', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue)),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: trackingCode ?? ''));
+                        Get.snackbar('সফল', 'ট্র্যাকিং কোড কপি করা হয়েছে');
+                      },
+                      child: const Icon(Icons.copy_rounded, size: 13, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('কনসাইনমেন্ট আইডি:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(consignmentId ?? 'N/A', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('ডেলিভারি অবস্থা:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    deliveryStatus ?? 'in_review',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.refresh_rounded, size: 14),
+                    label: const Text('স্ট্যাটাস আপডেট করুন', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    onPressed: _refreshSteadfastDeliveryStatus,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendToSteadfast() async {
+    final defaultCod = widget.order.paymentStatus == PaymentStatus.verified ? 0.0 : widget.order.totalAmount;
+    final codCtrl = TextEditingController(text: defaultCod.toStringAsFixed(0));
+    final noteCtrl = TextEditingController(text: 'Deliver within 24 hours');
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('স্টেডফাস্ট কুরিয়ার বুকিং নিশ্চিত করুন', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: codCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'COD Amount (৳)',
+                hintText: 'ক্যাশ অন ডেলিভারি অ্যামাউন্ট',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteCtrl,
+              decoration: const InputDecoration(
+                labelText: 'ডেলিভারি নোট',
+                hintText: 'যেমন: ৩টার মধ্যে ডেলিভারি দিন',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('বাতিল'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final cod = double.tryParse(codCtrl.text.trim()) ?? 0.0;
+              final note = noteCtrl.text.trim();
+              Get.back();
+
+              setState(() {
+                isUpdating = true;
+              });
+
+              try {
+                final response = await SteadfastService.createOrder(
+                  order: widget.order,
+                  codAmount: cod,
+                  note: note,
+                );
+
+                if (response['status'] == 'success') {
+                  final tracking = response['tracking_code'];
+                  final cid = response['consignment_id'];
+                  final dStatus = response['delivery_status'];
+
+                  await FirebaseFirestore.instance
+                      .collection('orders')
+                      .doc(widget.order.orderId)
+                      .update({
+                    'deliveryProvider': 'steadfast',
+                    'consignmentId': cid,
+                    'trackingCode': tracking,
+                    'deliveryStatus': dStatus,
+                    'orderStatus': OrderStatus.shipped.name,
+                  });
+
+                  setState(() {
+                    trackingCode = tracking;
+                    consignmentId = cid;
+                    deliveryProvider = 'steadfast';
+                    deliveryStatus = dStatus;
+                    currentOrderStatus = OrderStatus.shipped;
+                  });
+
+                  Get.snackbar('সফল', 'স্টেডফাস্ট কুরিয়ারে বুকিং সফল হয়েছে। ট্র্যাকিং কোড: $tracking');
+                } else {
+                  Get.snackbar('ত্রুটি', response['message'] ?? 'বুকিং ব্যর্থ হয়েছে');
+                }
+              } catch (e) {
+                Get.snackbar('ত্রুটি', 'বুকিং করার সময় সমস্যা হয়েছে: $e');
+              } finally {
+                setState(() {
+                  isUpdating = false;
+                });
+              }
+            },
+            child: const Text('বুকিং দিন'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _refreshSteadfastDeliveryStatus() async {
+    if (trackingCode == null || trackingCode!.isEmpty) return;
+
+    setState(() {
+      isUpdating = true;
+    });
+
+    try {
+      final response = await SteadfastService.checkStatus(trackingCode!);
+      if (response['status'] == 200) {
+        final dStatus = response['delivery_status']?.toString();
+        if (dStatus != null && dStatus.isNotEmpty) {
+          await FirebaseFirestore.instance
+              .collection('orders')
+              .doc(widget.order.orderId)
+              .update({
+            'deliveryStatus': dStatus,
+          });
+
+          setState(() {
+            deliveryStatus = dStatus;
+          });
+
+          Get.snackbar('সফল', 'ডেলিভারি স্ট্যাটাস আপডেট করা হয়েছে: $dStatus');
+        }
+      } else {
+        Get.snackbar('ত্রুটি', response['message'] ?? 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
+      }
+    } catch (e) {
+      Get.snackbar('ত্রুটি', 'স্ট্যাটাস আপডেট করার সময় সমস্যা হয়েছে: $e');
+    } finally {
+      setState(() {
+        isUpdating = false;
+      });
+    }
   }
 }

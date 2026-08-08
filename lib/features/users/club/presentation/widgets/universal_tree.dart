@@ -263,7 +263,7 @@ class _UniversalTreeWidgetState extends State<UniversalTreeWidget> {
               const Divider(height: 30),
               _buildDetailRow(Icons.phone_android, 'মোবাইল নম্বর', _maskMobile(mobile)),
               _buildDetailRow(Icons.email_outlined, 'ইমেইল', email),
-              _buildDetailRow(Icons.badge_outlined, 'পদবী/রোল', role),
+              _buildDetailRow(Icons.badge_outlined, 'পদবী/ব্যাজ', role),
               _buildDetailRow(Icons.people_outline, 'সরাসরি রেফারেল', '$directCount জন'),
               const SizedBox(height: 24),
               SizedBox(

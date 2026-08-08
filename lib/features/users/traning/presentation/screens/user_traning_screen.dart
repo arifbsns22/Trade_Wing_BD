@@ -158,7 +158,7 @@ class _UserTraningScreenState extends State<UserTraningScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'আপনার বর্তমান রোল অনুযায়ী ট্রেনিং তালিকা',
+                            'আপনার বর্তমান ব্যাজ অনুযায়ী ট্রেনিং তালিকা',
                             style: TextStyle(fontSize: 11, color: Colors.grey),
                           ),
                           Text(

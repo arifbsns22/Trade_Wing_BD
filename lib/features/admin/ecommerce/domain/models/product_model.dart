@@ -22,6 +22,7 @@ class Product {
   final Map<String, int> roleRewards;
   final DateTime? createdAt;
   final String? shopName;
+  final double weight; // Product weight in KG, defaults to 1.0
 
   Product({
     this.id,
@@ -45,6 +46,7 @@ class Product {
     required this.roleRewards,
     this.createdAt,
     this.shopName,
+    this.weight = 1.0,
   });
 
   // Convert Firestore DocumentSnapshot to Product object
@@ -89,6 +91,7 @@ class Product {
           ? (data['createdAt'] as Timestamp).toDate()
           : null,
       shopName: data['shopName'],
+      weight: ((data['weight'] ?? 1.0) as num).toDouble(),
     );
   }
 
@@ -115,6 +118,7 @@ class Product {
       'roleRewards': roleRewards,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
       'shopName': shopName,
+      'weight': weight,
     };
   }
 }

@@ -216,15 +216,30 @@ class AllUserTable extends StatelessWidget {
                                 ),
                               ),
                               DataCell(
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.remove_red_eye,
-                                    color: AppColors.primaryColor,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    Get.to(() => UserDetailsScreen(user: user));
-                                  },
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.remove_red_eye,
+                                        color: AppColors.primaryColor,
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        Get.to(() => UserDetailsScreen(user: user));
+                                      },
+                                      tooltip: 'বিস্তারিত দেখুন',
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline_rounded,
+                                        color: Colors.redAccent,
+                                        size: 20,
+                                      ),
+                                      onPressed: () => _confirmDeleteUser(context, user['mobile'], controller),
+                                      tooltip: 'ডিলিট করুন',
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -239,6 +254,21 @@ class AllUserTable extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _confirmDeleteUser(BuildContext context, String mobile, AdminUsersController controller) {
+    Get.defaultDialog(
+      title: 'ইউজার ডিলিট',
+      content: const Text('আপনি কি নিশ্চিত যে এই ইউজারটি সম্পূর্ণভাবে ডিলিট করতে চান? এটি আর ফিরিয়ে আনা যাবে না।'),
+      textCancel: 'বাতিল',
+      textConfirm: 'ডিলিট',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.redAccent,
+      onConfirm: () {
+        Get.back();
+        controller.deleteUser(mobile);
+      },
     );
   }
 }

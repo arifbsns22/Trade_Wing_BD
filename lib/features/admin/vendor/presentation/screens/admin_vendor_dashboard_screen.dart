@@ -127,7 +127,7 @@ class AdminVendorDashboardScreen extends StatelessWidget {
 
                 // Section Title
                 const Text(
-                  'রিসেলার তালিকা',
+                  'ভেন্ডর তালিকা',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
                 ),
                 const SizedBox(height: 12),

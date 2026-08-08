@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trade_wign_bd/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:trade_wign_bd/features/common/services/r2_storage_service.dart';
 import 'package:trade_wign_bd/uitls/constants/app_colors.dart';
+import 'support_sheet.dart';
 
 /// Verification Status Dialog - Premium design with soft colors and clear indicators
 class VerificationStatusDialog extends StatelessWidget {
@@ -22,7 +24,9 @@ class VerificationStatusDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final isReseller = targetRole == 'reseller';
     final roleBangla = isReseller ? 'রিসেলার' : 'ভেন্ডর';
-    final accentColor = isReseller ? const Color(0xFF08B3AC) : const Color(0xFF6366F1);
+    final accentColor = isReseller
+        ? const Color(0xFF08B3AC)
+        : const Color(0xFF6366F1);
 
     Color themeColor;
     Color softBgColor;
@@ -38,7 +42,8 @@ class VerificationStatusDialog extends StatelessWidget {
         iconData = Icons.hourglass_empty_rounded;
         statusTitle = 'আবেদনটি যাচাই করা হচ্ছে';
         statusBadgeText = 'যাচাইধীন';
-        statusSubtitle = 'আপনার $roleBangla অ্যাকাউন্ট সক্রিয় করার আবেদনটি বর্তমানে এডমিন প্যানেলের মাধ্যমে যাচাই করা হচ্ছে। শীঘ্রই এটি অনুমোদিত হলে আপনি আপনার ড্যাশবোর্ডে প্রবেশ করতে পারবেন।';
+        statusSubtitle =
+            'আপনার $roleBangla অ্যাকাউন্ট সক্রিয় করার আবেদনটি বর্তমানে এডমিন প্যানেলের মাধ্যমে যাচাই করা হচ্ছে। শীঘ্রই এটি অনুমোদিত হলে আপনি আপনার ড্যাশবোর্ডে প্রবেশ করতে পারবেন।';
         break;
       case 'hold':
         themeColor = const Color(0xFF0284C7); // Premium Sky Blue
@@ -46,7 +51,8 @@ class VerificationStatusDialog extends StatelessWidget {
         iconData = Icons.pause_circle_outline_rounded;
         statusTitle = 'আবেদনটি স্থগিত রাখা হয়েছে';
         statusBadgeText = 'স্থগিত';
-        statusSubtitle = 'তথ্য অসম্পূর্ণ থাকায় আপনার $roleBangla আবেদনটি সাময়িকভাবে স্থগিত করা হয়েছে। অনুগ্রহ করে হেল্পলাইনে কল করে অথবা ফেসবুক পেজে যোগাযোগ করে বিস্তারিত জেনে নিন।';
+        statusSubtitle =
+            'তথ্য অসম্পূর্ণ থাকায় আপনার $roleBangla আবেদনটি সাময়িকভাবে স্থগিত করা হয়েছে। অনুগ্রহ করে হেল্পলাইনে কল করে অথবা ফেসবুক পেজে যোগাযোগ করে বিস্তারিত জেনে নিন।';
         break;
       default: // rejected
         themeColor = const Color(0xFFDC2626); // Alert Red
@@ -54,7 +60,8 @@ class VerificationStatusDialog extends StatelessWidget {
         iconData = Icons.cancel_outlined;
         statusTitle = 'আবেদনটি বাতিল করা হয়েছে';
         statusBadgeText = 'বাতিল';
-        statusSubtitle = 'দুঃখিত, সঠিক তথ্য না থাকায় আপনার $roleBangla আবেদনটি বাতিল করা হয়েছে। দয়া করে সঠিক ও স্পষ্ট ডকুমেন্টসমূহ আপলোড করে আবার নতুন আবেদন জমা দিন।';
+        statusSubtitle =
+            'দুঃখিত, সঠিক তথ্য না থাকায় আপনার $roleBangla আবেদনটি বাতিল করা হয়েছে। দয়া করে সঠিক ও স্পষ্ট ডকুমেন্টসমূহ আপলোড করে আবার নতুন আবেদন জমা দিন।';
         break;
     }
 
@@ -93,23 +100,25 @@ class VerificationStatusDialog extends StatelessWidget {
                             blurRadius: 20,
                             spreadRadius: 2,
                             offset: const Offset(0, 8),
-                          )
+                          ),
                         ],
                       ),
-                      child: Icon(
-                        iconData,
-                        color: themeColor,
-                        size: 38,
-                      ),
+                      child: Icon(iconData, color: themeColor, size: 38),
                     ),
                     const SizedBox(height: 16),
                     // Status Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: softBgColor,
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: themeColor.withValues(alpha: 0.25), width: 1),
+                        border: Border.all(
+                          color: themeColor.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
                       ),
                       child: Text(
                         statusBadgeText,
@@ -185,7 +194,9 @@ class VerificationStatusDialog extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             Get.back();
-                            Get.dialog(VerificationDialog(targetRole: targetRole));
+                            Get.dialog(
+                              VerificationDialog(targetRole: targetRole),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accentColor,
@@ -198,7 +209,10 @@ class VerificationStatusDialog extends StatelessWidget {
                           ),
                           child: const Text(
                             'আবার আবেদন করুন',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       )
@@ -207,12 +221,18 @@ class VerificationStatusDialog extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             Get.back();
-                            _showSupportDialog(context);
+                            Get.bottomSheet(
+                              const SupportSheet(),
+                              isScrollControlled: true,
+                            );
                           },
-                          icon: const Icon(Icons.phone_in_talk_rounded, size: 16),
+                          icon: const Icon(
+                            Icons.phone_in_talk_rounded,
+                            size: 16,
+                          ),
                           label: const Text('হেল্পলাইন'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF08B3AC),
+                            backgroundColor: AppColors.primaryColor,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -224,7 +244,7 @@ class VerificationStatusDialog extends StatelessWidget {
                       ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -232,70 +252,13 @@ class VerificationStatusDialog extends StatelessWidget {
     );
   }
 
-  void _showSupportDialog(BuildContext context) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE6F7F7),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.phone_in_talk_rounded, color: Color(0xFF08B3AC), size: 32),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'হেল্পলাইন সাপোর্ট',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '+৮৮০১XXXXXXXXX',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF08B3AC), letterSpacing: 0.5),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'সকাল ৯:০০ টা থেকে রাত ৯:০০ টা পর্যন্ত',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Get.back(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF08B3AC),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text('ঠিক আছে', style: TextStyle(color: Colors.white)),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// The multi-step verification form dialog (Highly Premium 2-Step wizard)
 class VerificationDialog extends StatefulWidget {
   final String targetRole;
 
-  const VerificationDialog({
-    super.key,
-    required this.targetRole,
-  });
+  const VerificationDialog({super.key, required this.targetRole});
 
   @override
   State<VerificationDialog> createState() => _VerificationDialogState();
@@ -307,9 +270,9 @@ class _VerificationDialogState extends State<VerificationDialog> {
   final _tradeLicenseController = TextEditingController();
   final _categoriesController = TextEditingController();
 
-  File? _nidFrontImage;
-  File? _nidBackImage;
-  File? _selfieImage;
+  XFile? _nidFrontImage;
+  XFile? _nidBackImage;
+  XFile? _selfieImage;
 
   final ImagePicker _picker = ImagePicker();
   bool _isSubmitting = false;
@@ -324,11 +287,11 @@ class _VerificationDialogState extends State<VerificationDialog> {
     if (pickedFile != null) {
       setState(() {
         if (imageType == 1) {
-          _nidFrontImage = File(pickedFile.path);
+          _nidFrontImage = pickedFile;
         } else if (imageType == 2) {
-          _nidBackImage = File(pickedFile.path);
+          _nidBackImage = pickedFile;
         } else if (imageType == 3) {
-          _selfieImage = File(pickedFile.path);
+          _selfieImage = pickedFile;
         }
       });
     }
@@ -361,7 +324,9 @@ class _VerificationDialogState extends State<VerificationDialog> {
   }
 
   void _submit() async {
-    if (_nidFrontImage == null || _nidBackImage == null || _selfieImage == null) {
+    if (_nidFrontImage == null ||
+        _nidBackImage == null ||
+        _selfieImage == null) {
       Get.snackbar(
         'ত্রুটি',
         'দয়া করে আপনার এনআইডির দুই পাশের ছবি এবং নিজের ছবি আপলোড করুন।',
@@ -391,16 +356,37 @@ class _VerificationDialogState extends State<VerificationDialog> {
       final r2Service = R2StorageService();
 
       // Upload images
-      final frontPath = 'verifications/${widget.targetRole}/${mobile}_nid_front.jpg';
-      final backPath = 'verifications/${widget.targetRole}/${mobile}_nid_back.jpg';
-      final selfiePath = 'verifications/${widget.targetRole}/${mobile}_selfie.jpg';
+      final frontPath =
+          'verifications/${widget.targetRole}/${mobile}_nid_front.jpg';
+      final backPath =
+          'verifications/${widget.targetRole}/${mobile}_nid_back.jpg';
+      final selfiePath =
+          'verifications/${widget.targetRole}/${mobile}_selfie.jpg';
 
-      final frontUrl = await r2Service.uploadFile(file: _nidFrontImage!, destinationPath: frontPath);
-      final backUrl = await r2Service.uploadFile(file: _nidBackImage!, destinationPath: backPath);
-      final selfieUrl = await r2Service.uploadFile(file: _selfieImage!, destinationPath: selfiePath);
+      final frontBytes = await _nidFrontImage!.readAsBytes();
+      final backBytes = await _nidBackImage!.readAsBytes();
+      final selfieBytes = await _selfieImage!.readAsBytes();
+
+      final frontUrl = await r2Service.uploadBytes(
+        bytes: frontBytes,
+        destinationPath: frontPath,
+        contentType: 'image/jpeg',
+      );
+      final backUrl = await r2Service.uploadBytes(
+        bytes: backBytes,
+        destinationPath: backPath,
+        contentType: 'image/jpeg',
+      );
+      final selfieUrl = await r2Service.uploadBytes(
+        bytes: selfieBytes,
+        destinationPath: selfiePath,
+        contentType: 'image/jpeg',
+      );
 
       if (frontUrl == null || backUrl == null || selfieUrl == null) {
-        throw Exception('ছবি আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+        throw Exception(
+          'ছবি আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        );
       }
 
       final keyPrefix = widget.targetRole;
@@ -439,7 +425,6 @@ class _VerificationDialogState extends State<VerificationDialog> {
         buttonColor: AppColors.primaryColor,
         onConfirm: () => Get.back(),
       );
-
     } catch (e) {
       Get.snackbar(
         'ত্রুটি',
@@ -462,10 +447,14 @@ class _VerificationDialogState extends State<VerificationDialog> {
   Widget build(BuildContext context) {
     final isReseller = widget.targetRole == 'reseller';
     final title = isReseller ? 'রিসেলার ভেরিফিকেশন' : 'ভেন্ডর ভেরিফিকেশন';
-    
+
     // Premium theme colors based on role
-    final accentColor = isReseller ? const Color(0xFF08B3AC) : const Color(0xFF6366F1);
-    final softBgColor = isReseller ? const Color(0xFFF0FDFB) : const Color(0xFFEEF2FF);
+    final accentColor = isReseller
+        ? const Color(0xFF08B3AC)
+        : const Color(0xFF6366F1);
+    final softBgColor = isReseller
+        ? const Color(0xFFF0FDFB)
+        : const Color(0xFFEEF2FF);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -497,7 +486,9 @@ class _VerificationDialogState extends State<VerificationDialog> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
-                            isReseller ? Icons.shopping_bag_outlined : Icons.storefront_outlined,
+                            isReseller
+                                ? Icons.shopping_bag_outlined
+                                : Icons.storefront_outlined,
                             color: accentColor,
                             size: 20,
                           ),
@@ -516,22 +507,31 @@ class _VerificationDialogState extends State<VerificationDialog> {
                                 ),
                               ),
                               Text(
-                                isReseller ? 'রিসেলিং শুরু করতে তথ্য দিন' : 'ভেন্ডর হিসেবে যোগ দিতে তথ্য দিন',
-                                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                isReseller
+                                    ? 'রিসেলিং শুরু করতে তথ্য দিন'
+                                    : 'ভেন্ডর হিসেবে যোগ দিতে তথ্য দিন',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF64748B),
+                                ),
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 20),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Color(0xFF94A3B8),
+                            size: 20,
+                          ),
                           onPressed: () => Get.back(),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),
-                    
+
                     // Stepper Progress Bar
                     Row(
                       children: [
@@ -549,7 +549,9 @@ class _VerificationDialogState extends State<VerificationDialog> {
                           child: Container(
                             height: 4,
                             decoration: BoxDecoration(
-                              color: _currentStep == 1 ? accentColor : const Color(0xFFE2E8F0),
+                              color: _currentStep == 1
+                                  ? accentColor
+                                  : const Color(0xFFE2E8F0),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -559,7 +561,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
                     const SizedBox(height: 16),
 
                     // Conditionally show step layouts
-                    _currentStep == 0 
+                    _currentStep == 0
                         ? _buildInfoStep(softBgColor, accentColor)
                         : _buildUploadStep(softBgColor, accentColor),
                   ],
@@ -590,10 +592,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
                     const SizedBox(height: 4),
                     const Text(
                       'অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF64748B),
-                      ),
+                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -616,11 +615,16 @@ class _VerificationDialogState extends State<VerificationDialog> {
           keyboardType: TextInputType.number,
           validator: (v) {
             if (v == null || v.trim().isEmpty) return 'এনআইডি নম্বরটি লিখুন';
-            if (v.trim().length < 10) return 'এনআইডি নম্বরটি অত্যন্ত ছোট';
+            if (v.trim().length < 6) return 'এনআইডি নম্বরটি অত্যন্ত ছোট';
             return null;
           },
           style: const TextStyle(fontSize: 13, color: Color(0xFF0F172A)),
-          decoration: _inputDecoration('এনআইডি নম্বরটি টাইপ করুন', Icons.badge_outlined, softBg, focusColor),
+          decoration: _inputDecoration(
+            'এনআইডি নম্বরটি টাইপ করুন',
+            Icons.badge_outlined,
+            softBg,
+            focusColor,
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -629,7 +633,12 @@ class _VerificationDialogState extends State<VerificationDialog> {
         TextFormField(
           controller: _tradeLicenseController,
           style: const TextStyle(fontSize: 13, color: Color(0xFF0F172A)),
-          decoration: _inputDecoration('ট্রেড লাইসেন্স নম্বরটি টাইপ করুন', Icons.description_outlined, softBg, focusColor),
+          decoration: _inputDecoration(
+            'ট্রেড লাইসেন্স নম্বরটি টাইপ করুন',
+            Icons.description_outlined,
+            softBg,
+            focusColor,
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -639,11 +648,17 @@ class _VerificationDialogState extends State<VerificationDialog> {
           controller: _categoriesController,
           maxLines: 2,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'কিছু ক্যাটাগরির নাম লিখুন';
+            if (v == null || v.trim().isEmpty)
+              return 'কিছু ক্যাটাগরির নাম লিখুন';
             return null;
           },
           style: const TextStyle(fontSize: 13, color: Color(0xFF0F172A)),
-          decoration: _inputDecoration('যেমন: থ্রি-পিস, শার্ট, খেলনা, খাবার ইত্যাদি', Icons.category_outlined, softBg, focusColor),
+          decoration: _inputDecoration(
+            'যেমন: থ্রি-পিস, শার্ট, খেলনা, খাবার ইত্যাদি',
+            Icons.category_outlined,
+            softBg,
+            focusColor,
+          ),
         ),
         const SizedBox(height: 20),
 
@@ -672,7 +687,11 @@ class _VerificationDialogState extends State<VerificationDialog> {
                   ),
                 ),
                 SizedBox(width: 8),
-                Icon(Icons.arrow_forward_rounded, size: 16, color: Colors.white),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ],
             ),
           ),
@@ -803,11 +822,20 @@ class _VerificationDialogState extends State<VerificationDialog> {
     );
   }
 
-  InputDecoration _inputDecoration(String placeholder, IconData prefix, Color softBg, Color focusColor) {
+  InputDecoration _inputDecoration(
+    String placeholder,
+    IconData prefix,
+    Color softBg,
+    Color focusColor,
+  ) {
     return InputDecoration(
       hintText: placeholder,
       hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12.5),
-      prefixIcon: Icon(prefix, color: focusColor.withValues(alpha: 0.7), size: 18),
+      prefixIcon: Icon(
+        prefix,
+        color: focusColor.withValues(alpha: 0.7),
+        size: 18,
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       filled: true,
       fillColor: const Color(0xFFF8FAFC),
@@ -829,7 +857,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
 
   Widget _imagePickerCard({
     required String title,
-    required File? image,
+    required XFile? image,
     required VoidCallback onTap,
     required VoidCallback onClear,
     required Color accentColor,
@@ -849,12 +877,19 @@ class _VerificationDialogState extends State<VerificationDialog> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      image,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                    child: kIsWeb
+                        ? Image.network(
+                            image.path,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          )
+                        : Image.file(
+                            File(image.path),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
                   ),
                   Positioned(
                     top: 6,

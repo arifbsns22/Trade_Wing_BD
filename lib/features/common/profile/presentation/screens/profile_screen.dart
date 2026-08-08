@@ -11,9 +11,93 @@ import '../widgets/profile_stat_tile.dart';
 import '../widgets/referral_code_card.dart';
 import '../widgets/help_text_referall_code_sheet.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/order_history_screen.dart';
+import 'package:trade_wign_bd/features/users/wallet/presentation/screens/wallet_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
+
+  static const Map<String, List<String>> _bangladeshAddressData = {
+    'ঢাকা বিভাগ': [
+      'ঢাকা জেলা',
+      'ফরিদপুর জেলা',
+      'গাজীপুর জেলা',
+      'গোপালগঞ্জ জেলা',
+      'কিশোরগঞ্জ জেলা',
+      'মাদারীপুর জেলা',
+      'মানিকগঞ্জ জেলা',
+      'মুন্সীগঞ্জ জেলা',
+      'নারায়ণগঞ্জ জেলা',
+      'নরসিংদী জেলা',
+      'রাজবাড়ী জেলা',
+      'শরীয়তপুর জেলা',
+      'টাঙ্গাইল জেলা'
+    ],
+    'খুলনা বিভাগ': [
+      'বাগেরহাট জেলা',
+      'চুয়াডাঙ্গা জেলা',
+      'যশোর জেলা',
+      'ঝিনাইদহ জেলা',
+      'খুলনা জেলা',
+      'কুষ্টিয়া জেলা',
+      'মাগুরা জেলা',
+      'মেহেরপুর জেলা',
+      'নড়াইল জেলা',
+      'সাতক্ষীরা জেলা'
+    ],
+    'চট্টগ্রাম বিভাগ': [
+      'বান্দরবান জেলা',
+      'ব্রাহ্মণবাড়িয়া জেলা',
+      'চাঁদপুর জেলা',
+      'চট্টগ্রাম জেলা',
+      'কুমিল্লা জেলা',
+      'কক্সবাজার জেলা',
+      'ফেনী জেলা',
+      'খাগড়াছড়ি জেলা',
+      'লক্ষ্মীপুর জেলা',
+      'নোয়াখালী জেলা',
+      'রাঙ্গামাটি পার্বত্য জেলা'
+    ],
+    'রাজশাহী বিভাগ': [
+      'বগুড়া জেলা',
+      'জয়পুরহাট জেলা',
+      'নওগাঁ জেলা',
+      'নাটোর জেলা',
+      'চাঁপাইনবাবগঞ্জ জেলা',
+      'পাবনা জেলা',
+      'রাজশাহী জেলা',
+      'সিরাজগঞ্জ জেলা'
+    ],
+    'সিলেট বিভাগ': [
+      'হবিগঞ্জ জেলা',
+      'মৌলভীবাজার জেলা',
+      'সুনামগঞ্জ জেলা',
+      'সিলেট জেলা'
+    ],
+    'রংপুর বিভাগ': [
+      'দিনাজপুর জেলা',
+      'গাইবান্ধা জেলা',
+      'কুড়িগ্রাম জেলা',
+      'লালমনিরহাট জেলা',
+      'নীলফামারী জেলা',
+      'পঞ্চগড় জেলা',
+      'রংপুর জেলা',
+      'ঠাকুরগাঁও জেলা'
+    ],
+    'ময়মনসিংহ বিভাগ': [
+      'জামালপুর জেলা',
+      'ময়মনসিংহ জেলা',
+      'নেত্রকোণা জেলা',
+      'শেরপুর জেলা'
+    ],
+    'বরিশাল বিভাগ': [
+      'বরগুনা জেলা',
+      'বরিশাল জেলা',
+      'ভোলা জেলা',
+      'ঝালকাঠি জেলা',
+      'পটুয়াখালী জেলা',
+      'পিরোজপুর জেলা'
+    ]
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -360,16 +444,7 @@ class UserProfileScreen extends StatelessWidget {
                       leadingIcon: Icons.account_balance_wallet_outlined,
                       title: 'ডিজিটাল মানিব্যাগ',
                       onTap: () {
-                        Get.snackbar(
-  'তথ্য',
-  'ডিজিটাল মানিব্যাগ শীঘ্রই আসছে',
-  backgroundColor: Colors.white.withValues(alpha: 0.9),
-  colorText: Colors.black87,
-  borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-  borderWidth: 1,
-  snackPosition: SnackPosition.BOTTOM,
-  margin: const EdgeInsets.all(16),
-);
+                        Get.to(() => const WalletScreen());
                       },
                     ),
 
@@ -656,30 +731,46 @@ class UserProfileScreen extends StatelessWidget {
   ) {
     final houseController = TextEditingController();
     final streetController = TextEditingController();
-    final cityController = TextEditingController();
-    final divisionController = TextEditingController();
     final postcodeController = TextEditingController();
 
-    // Optional: Try to prefill
+    String? selectedDivision;
+    String? selectedDistrict;
+
+    // Prefill fields
     if (controller.address.value.isNotEmpty) {
       final addr = controller.address.value;
       final houseMatch = RegExp(r'বাসা:\s*([^,]+)').firstMatch(addr);
-      final streetMatch = RegExp(r'রাস্তা:\s*([^,]+)').firstMatch(addr);
-      final cityMatch = RegExp(r'শহর:\s*([^,]+)').firstMatch(addr);
+      final streetMatch = RegExp(r'(রাস্তা|এলাকা):\s*([^,]+)').firstMatch(addr);
+      final cityMatch = RegExp(r'(শহর|জেলা):\s*([^,]+)').firstMatch(addr);
       final divisionMatch = RegExp(r'বিভাগ:\s*([^,]+)').firstMatch(addr);
       final postcodeMatch = RegExp(r'পোস্টকোড:\s*([^,]+)').firstMatch(addr);
 
-      if (houseMatch != null) houseController.text = houseMatch.group(1)!.trim();
-      if (streetMatch != null) streetController.text = streetMatch.group(1)!.trim();
-      if (cityMatch != null) cityController.text = cityMatch.group(1)!.trim();
-      if (divisionMatch != null) divisionController.text = divisionMatch.group(1)!.trim();
-      if (postcodeMatch != null) postcodeController.text = postcodeMatch.group(1)!.trim();
+      if (houseMatch != null) {
+        houseController.text = houseMatch.group(1)!.trim();
+      }
+      if (streetMatch != null) {
+        streetController.text = streetMatch.group(2)!.trim();
+      }
+      if (postcodeMatch != null) {
+        postcodeController.text = postcodeMatch.group(1)!.trim();
+      }
 
-      // Fallback
-      if (streetController.text.isEmpty && houseController.text.isEmpty && cityController.text.isEmpty) {
-        streetController.text = addr;
+      if (divisionMatch != null) {
+        final div = divisionMatch.group(1)!.trim();
+        if (_bangladeshAddressData.containsKey(div)) {
+          selectedDivision = div;
+        }
+      }
+
+      if (cityMatch != null && selectedDivision != null) {
+        final dist = cityMatch.group(2)!.trim();
+        final list = _bangladeshAddressData[selectedDivision];
+        if (list != null && list.contains(dist)) {
+          selectedDistrict = dist;
+        }
       }
     }
+
     final formKey = GlobalKey<FormState>();
 
     Get.bottomSheet(
@@ -689,125 +780,206 @@ class UserProfileScreen extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 50,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'ঠিকানা আপডেট করুন',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'আপনার পণ্য এবং প্যাকেজ ডেলিভারির জন্য সঠিক ঠিকানা দিন',
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
-                ),
-                const SizedBox(height: 24),
-
-                // Address Inputs
-                _buildAddressInput(houseController, 'বাড়ি / বাসা নম্বর'),
-                _buildAddressInput(streetController, 'রাস্তার নাম / এলাকা'),
-                _buildAddressInput(cityController, 'শহর / উপজেলা'),
-                _buildAddressInput(divisionController, 'বিভাগ / জেলা'),
-                _buildAddressInput(postcodeController, 'পোস্টকোড / জিপকোড'),
-                const SizedBox(height: 24),
-
-                // Action Buttons
-                Row(
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade300),
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Text(
-                          'বাতিল',
-                          style: TextStyle(color: Colors.grey.shade700),
-                        ),
-                        onPressed: () => Get.back(),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Obx(
-                        () => ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'ঠিকানা আপডেট করুন',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'আপনার পণ্য এবং প্যাকেজ ডেলিভারির জন্য সঠিক ঠিকানা দিন',
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 1. Division Dropdown
+                    const Text('বিভাগ *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      value: selectedDivision,
+                      decoration: _buildDropdownDecor('বিভাগ নির্বাচন করুন'),
+                      items: _bangladeshAddressData.keys.map((division) {
+                        return DropdownMenuItem<String>(
+                          value: division,
+                          child: Text(division, style: const TextStyle(fontSize: 14)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setSheetState(() {
+                          selectedDivision = val;
+                          selectedDistrict = null; // Reset district
+                        });
+                      },
+                      validator: (v) => v == null ? 'দয়া করে বিভাগ নির্বাচন করুন' : null,
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 2. District Dropdown
+                    const Text('জেলা *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      value: selectedDistrict,
+                      decoration: _buildDropdownDecor('জেলা নির্বাচন করুন'),
+                      items: selectedDivision == null
+                          ? []
+                          : _bangladeshAddressData[selectedDivision]!.map((district) {
+                              return DropdownMenuItem<String>(
+                                value: district,
+                                child: Text(district, style: const TextStyle(fontSize: 14)),
+                              );
+                            }).toList(),
+                      onChanged: (val) {
+                        setSheetState(() {
+                          selectedDistrict = val;
+                        });
+                      },
+                      validator: (v) => v == null ? 'দয়া করে জেলা নির্বাচন করুন' : null,
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 3. Area Name
+                    _buildAddressInput(streetController, 'এলাকার নাম', isRequired: true),
+
+                    // 4. House Name/Number
+                    _buildAddressInput(houseController, 'বাসার নাম/নাম্বার', isRequired: true),
+
+                    // 5. Post code / Zip code
+                    _buildAddressInput(postcodeController, 'পোস্টকোড / জিপকোড', isRequired: true, keyboardType: TextInputType.number),
+
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
                             ),
-                            elevation: 0,
+                            child: Text(
+                              'বাতিল',
+                              style: TextStyle(color: Colors.grey.shade700),
+                            ),
+                            onPressed: () => Get.back(),
                           ),
-                          onPressed: controller.isLoading.value
-                              ? null
-                              : () async {
-                                  if (formKey.currentState!.validate()) {
-                                    final house = houseController.text.trim();
-                                    final street = streetController.text.trim();
-                                    final city = cityController.text.trim();
-                                    final division = divisionController.text.trim();
-                                    final postcode = postcodeController.text.trim();
-                                    
-                                    final addressStr = 'বাসা: $house, রাস্তা: $street, শহর: $city, বিভাগ: $division, পোস্টকোড: $postcode';
-                                    
-                                    Get.back(); // Close bottom sheet first
-                                    await controller.updateAddress(addressStr);
-                                  }
-                                },
-                          child: controller.isLoading.value
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('সংরক্ষণ করুন'),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Obx(
+                            () => ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.green,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : () async {
+                                      if (formKey.currentState!.validate()) {
+                                        final house = houseController.text.trim();
+                                        final street = streetController.text.trim();
+                                        final postcode = postcodeController.text.trim();
+
+                                        final addressStr = 'বাসা: $house, এলাকা: $street, জেলা: $selectedDistrict, বিভাগ: $selectedDivision, পোস্টকোড: $postcode';
+
+                                        Get.back(); // Close bottom sheet
+                                        await controller.updateAddress(addressStr);
+                                      }
+                                    },
+                              child: controller.isLoading.value
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'সংরক্ষণ করুন',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
                   ],
                 ),
-                const SizedBox(height: 10),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
       isScrollControlled: true,
     );
   }
 
-  Widget _buildAddressInput(TextEditingController ctrl, String label) {
+  InputDecoration _buildDropdownDecor(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.primaryColor, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+  }
+
+  Widget _buildAddressInput(
+    TextEditingController ctrl,
+    String label, {
+    bool isRequired = true,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: ctrl,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -821,7 +993,7 @@ class UserProfileScreen extends StatelessWidget {
           ),
         ),
         validator: (value) {
-          if (value == null || value.trim().isEmpty) {
+          if (isRequired && (value == null || value.trim().isEmpty)) {
             return 'অনুগ্রহ করে পূরণ করুন';
           }
           return null;

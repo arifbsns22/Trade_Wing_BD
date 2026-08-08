@@ -8,6 +8,7 @@ import 'package:trade_wign_bd/uitls/constants/app_texts.dart';
 import 'package:trade_wign_bd/uitls/constants/assets_path/features_path.dart';
 import 'package:trade_wign_bd/features/users/e-commerce/presentation/screens/all_products_screen.dart';
 import 'package:trade_wign_bd/features/users/home/presentation/widgets/support_sheet.dart';
+import 'package:trade_wign_bd/features/users/packages/presentation/screens/user_packages_screen.dart';
 import 'package:trade_wign_bd/features/common/coming_soon_popuo.dart';
 import 'package:trade_wign_bd/features/users/club/presentation/screens/business_club_screen.dart';
 import 'package:trade_wign_bd/features/users/drive_pack/presentation/screens/user_drive_pack_screens.dart';
@@ -17,6 +18,48 @@ import 'package:trade_wign_bd/features/users/vendor/presentation/screens/vendor_
 import 'package:trade_wign_bd/features/users/reseller/presentation/screens/reseller_dashboard_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:trade_wign_bd/features/users/home/presentation/widgets/verification_dialog.dart';
+
+void _showActiveCustomerRequiredDialog(String targetRole) {
+  Get.dialog(
+    AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Row(
+        children: [
+          Icon(Icons.lock_outline_rounded, color: AppColors.green, size: 24),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '${targetRole == 'reseller' ? 'রিসেলার' : 'ভেন্ডর'} লক!',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      content: Text(
+        '${targetRole == 'reseller' ? 'রিসেলার' : 'ভেন্ডর'} হিসেবে আবেদন করতে হলে আপনাকে প্রথমে আমাদের মেম্বারশিপ প্যাকেজটি কিনে "সক্রিয় কাস্টমার" (Active Customer) হতে হবে।',
+        style: const TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('পরে করব', style: TextStyle(color: Colors.grey)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.green,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          onPressed: () {
+            Get.back();
+            Get.to(() => const UserPackagesScreen());
+          },
+          child: const Text('প্যাকেজ সমূহ'),
+        ),
+      ],
+    ),
+  );
+}
 
 class FeatureItem {
   final String title;
@@ -47,22 +90,22 @@ final List<FeatureItem> featureList = [
     onTap: () async {
       final authController = Get.find<AuthController>();
       final role = authController.currentUserRole.value.toLowerCase().trim();
-      if (role == 'guest customer' || role == 'guest' || role == '') {
-        Get.snackbar(
-          'লগইন প্রয়োজন',
-          'এই বিভাগে প্রবেশ করতে অনুগ্রহ করে একটি অ্যাকাউন্ট তৈরি করুন বা লগইন করুন।',
-          backgroundColor: Colors.white.withValues(alpha: 0.9),
-          colorText: Colors.black87,
-          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-          borderWidth: 1,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-        );
+
+      // If already Reseller/Admin/Super Admin, go to dashboard
+      if (role == 'reseller' || role == 'admin' || role == 'super admin') {
+        Get.to(() => const ResellerDashboardScreen());
         return;
       }
 
-      if (role == 'reseller' || role == 'admin' || role == 'super admin') {
+      // If Guest/Guest Customer/Not Logged In, go to dashboard (which handles login flow)
+      if (role == 'guest customer' || role == 'guest' || role == '') {
         Get.to(() => const ResellerDashboardScreen());
+        return;
+      }
+
+      // If they are a normal Customer, they MUST purchase a membership package first
+      if (role == 'customer') {
+        _showActiveCustomerRequiredDialog('reseller');
         return;
       }
 
@@ -113,22 +156,22 @@ final List<FeatureItem> featureList = [
     onTap: () async {
       final authController = Get.find<AuthController>();
       final role = authController.currentUserRole.value.toLowerCase().trim();
-      if (role == 'guest customer' || role == 'guest' || role == '') {
-        Get.snackbar(
-          'লগইন প্রয়োজন',
-          'এই বিভাগে প্রবেশ করতে অনুগ্রহ করে একটি অ্যাকাউন্ট তৈরি করুন বা লগইন করুন।',
-          backgroundColor: Colors.white.withValues(alpha: 0.9),
-          colorText: Colors.black87,
-          borderColor: const Color(0xFF08B3AC).withValues(alpha: 0.2),
-          borderWidth: 1,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-        );
+
+      // If already Vendor/Admin/Super Admin, go to dashboard
+      if (role == 'vendor' || role == 'admin' || role == 'super admin') {
+        Get.to(() => const VendorDashboardScreen());
         return;
       }
 
-      if (role == 'vendor' || role == 'admin' || role == 'super admin') {
+      // If Guest/Guest Customer/Not Logged In, go to dashboard (which handles login flow)
+      if (role == 'guest customer' || role == 'guest' || role == '') {
         Get.to(() => const VendorDashboardScreen());
+        return;
+      }
+
+      // If they are a normal Customer, they MUST purchase a membership package first
+      if (role == 'customer') {
+        _showActiveCustomerRequiredDialog('vendor');
         return;
       }
 
@@ -230,7 +273,7 @@ class FeatureGrid extends StatelessWidget {
           ],
         ),
         content: Text(
-          'আপনার বর্তমান রোল ($roleName)-এর জন্য আরও $pendingCount টি ট্রেনিং বাকি আছে। অ্যাপের সকল সুবিধা ব্যবহার করতে প্রথমে ট্রেনিংগুলো সম্পন্ন করুন।',
+          'আপনার বর্তমান ব্যাজ ($roleName)-এর জন্য আরও $pendingCount টি ট্রেনিং বাকি আছে। অ্যাপের সকল সুবিধা ব্যবহার করতে প্রথমে ট্রেনিংগুলো সম্পন্ন করুন।',
           style: const TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
         ),
         actions: [

@@ -139,6 +139,11 @@ class AdminVendorListTable extends StatelessWidget {
                                     tooltip: 'স্থগিত',
                                   ),
                                 ],
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                                  onPressed: () => _confirmDeleteUser(context, mobile, controller),
+                                  tooltip: 'ডিলিট করুন',
+                                ),
                               ],
                             )),
                             DataCell(Text('${stats['completedOrders']} টি', style: const TextStyle(fontSize: 12))),
@@ -407,6 +412,21 @@ class AdminVendorListTable extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _confirmDeleteUser(BuildContext context, String mobile, AdminVendorDashboardController controller) {
+    Get.defaultDialog(
+      title: 'ইউজার ডিলিট',
+      content: const Text('আপনি কি নিশ্চিত যে এই ইউজারটি সম্পূর্ণভাবে ডিলিট করতে চান? এটি আর ফিরিয়ে আনা যাবে না।'),
+      textCancel: 'বাতিল',
+      textConfirm: 'ডিলিট',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.redAccent,
+      onConfirm: () {
+        Get.back();
+        controller.deleteUser(mobile);
+      },
     );
   }
 }

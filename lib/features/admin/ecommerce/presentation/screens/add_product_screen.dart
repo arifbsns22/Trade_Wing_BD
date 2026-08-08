@@ -27,6 +27,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   // Main Form Controllers
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
+  late TextEditingController _weightController;
 
   // Selected state
   String _selectedStatus = 'public'; // 'public' -> Active, 'draft' -> Inactive
@@ -77,6 +78,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final p = widget.productToEdit;
     _nameController = TextEditingController(text: p?.name ?? '');
     _descriptionController = TextEditingController(text: p?.description ?? '');
+    _weightController = TextEditingController(text: (p?.weight ?? 1.0).toString());
     _selectedStatus = p?.status ?? 'public';
 
     // Parse image list
@@ -122,6 +124,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
@@ -327,6 +330,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         status: _selectedStatus,
         rolePrices: _rolePrices,
         roleRewards: _roleRewards,
+        weight: double.tryParse(_weightController.text.trim()) ?? 1.0,
         createdAt: _isEditMode
             ? widget.productToEdit!.createdAt
             : DateTime.now(),
@@ -718,6 +722,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 isRequired: true,
                 subtitle: _selectedProductUnit ?? 'Select Unit',
                 onAddTap: () => _showProductUnitBottomSheet(context),
+              ),
+              const SizedBox(height: 12),
+
+              // Product Weight row
+              _buildConfigItemTile(
+                icon: Icons.monitor_weight_outlined,
+                title: 'Product Weight (ওজন)',
+                isRequired: true,
+                subtitle: _weightController.text.isEmpty
+                    ? 'Add Weight (default: 1.0 KG)'
+                    : '${_weightController.text} KG',
+                onAddTap: () => _showWeightBottomSheet(context),
               ),
               const SizedBox(height: 12),
 
@@ -2148,6 +2164,99 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       onPressed: () {
                         setState(() {
                           _stock = int.tryParse(stockController.text) ?? 0;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showWeightBottomSheet(BuildContext context) {
+    final localWeightCtrl = TextEditingController(
+      text: _weightController.text,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Product Weight',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 10),
+              const Text(
+                'Weight in KG (কেজিতে ওজন)',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: localWeightCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: _buildFormFieldDecoration('যেমন: 1.0'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _weightController.text = localWeightCtrl.text;
                         });
                         Navigator.pop(context);
                       },
